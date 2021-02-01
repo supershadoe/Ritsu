@@ -1,0 +1,4 @@
+# Bot token
+# Add your bot token below which you get when creating a bot in discord
+# developer portal.
+bot_token = ""
