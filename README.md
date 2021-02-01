@@ -20,6 +20,7 @@
 <h2>How-to-use<br/>
 (For people trying to self-host the bot/Making a different version of bot)
 </h2>
+
 > Using the bot which is hosted by me is preferred but writing the steps here nevertheless.
 >
 > Though, keep in mind that no support would be provided from my side for the self-hosted/forked versions of the bot.
