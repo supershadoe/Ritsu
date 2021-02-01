@@ -5,7 +5,8 @@
 <p align="center">
 <a href="https://discord.gg/tjpCXx9RMr" alt="Discord server invite"><img src="https://discord.com/api/guilds/801170087688011828/embed.png" /></a>
 <a href="http://apache.org/licenses/LICENSE-2.0" alt="License: Apache"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" /></a>
-<img src="https://img.shields.io/badge/Python-3.9+-blue" />
+<img src="https://img.shields.io/badge/Python-3.9+-green" />
+<a href="https://discord.com/api/oauth2/authorize?client_id=776112201734815786&permissions=85056&scope=bot" alt="Bot invite link"><img src="https://img.shields.io/badge/Bot-Invite-blue" /></a>
 </p>
 <hr />
 
@@ -19,6 +20,10 @@
 <h2>How-to-use<br/>
 (For people trying to self-host the bot/Making a different version of bot)
 </h2>
+> Using the bot which is hosted by me is preferred but writing the steps here nevertheless.
+>
+> Though, keep in mind that no support would be provided from my side for the self-hosted/forked versions of the bot.
+
 This code is written to work in Python 3.9 or above and uses [discord.py](https://github.com/rapptz/discord.py) library.
 
 Some part of the code uses Linux(more specifically GNU/Linux as some grep arguments are different in different \*nixes) commands like grep and sed.
