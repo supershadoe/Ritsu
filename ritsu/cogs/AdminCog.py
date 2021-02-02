@@ -18,11 +18,11 @@ class AdminCog(commands.Cog, name="Admin Commands", command_attrs=dict(hidden=Tr
     "Has dev-only(owner-only) commands like eval and shutdown."
     def __init__(self, bot):
         self.bot = bot
-        self.cog_check(commands.is_owner())
 
     #------------------------------------------
 
     @commands.command()
+    @commands.is_owner()
     async def _load(self, ctx, cog_name):
         "To load a cog while debugging"
         await ctx.send(f"Loading cog **{cog_name}**...")
@@ -31,6 +31,7 @@ class AdminCog(commands.Cog, name="Admin Commands", command_attrs=dict(hidden=Tr
     #------------------------------------------
 
     @commands.command()
+    @commands.is_owner()
     async def _unload(self, ctx, cog_name):
         "To unload a cog while debugging"
         await ctx.send(f"Unloading cog **{cog_name}**...")
@@ -39,6 +40,7 @@ class AdminCog(commands.Cog, name="Admin Commands", command_attrs=dict(hidden=Tr
     #------------------------------------------
 
     @commands.command()
+    @commands.is_owner()
     async def _reload(self, ctx, cog_name):
         "To reload a cog while debugging"
         await ctx.send(f"Reloading cog **{cog_name}**...")
@@ -47,6 +49,7 @@ class AdminCog(commands.Cog, name="Admin Commands", command_attrs=dict(hidden=Tr
     #------------------------------------------
 
     @commands.command()
+    @commands.is_owner()
     async def _ping(self, ctx):
         "For just pinging the bot"
         await ctx.send(embed=Embed(title="Ping response", description=f"Pong!\nBot latency is **{int(self.bot.latency*1000)} ms**.", color=0xFF00FF))
@@ -54,6 +57,7 @@ class AdminCog(commands.Cog, name="Admin Commands", command_attrs=dict(hidden=Tr
     #------------------------------------------
 
     @commands.command()
+    @commands.is_owner()
     async def _eval(self, ctx, *args):
         "Eval command: DANGER ZONE!"
         res=eval(' '.join(args))
@@ -66,10 +70,19 @@ class AdminCog(commands.Cog, name="Admin Commands", command_attrs=dict(hidden=Tr
     #------------------------------------------
 
     @commands.command()
+    @commands.is_owner()
     async def _shutdown(self, ctx):
         "Shutdown command(owner-only)"
         await ctx.send(embed=Embed(title="Shutting down", description="⏻ Shutting down after command from owner...", color=0xFF0000))
         return await self.bot.logout()
+
+    #------------------------------------------
+
+    @commands.command()
+    @commands.is_owner()
+    async def _todo(self, ctx):
+        "To do command for myself"
+        return await ctx.send("https://discord.com/channels/801170087688011828/801174287427174410/805653802308206602")
 
 #------------------------------------------
 

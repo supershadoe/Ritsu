@@ -15,7 +15,7 @@ from discord.ext import commands
 
 from ritsu.utils import get_file
 
-debug_mode=False
+debug_mode=True
 if debug_mode:
     import logging
     import traceback
