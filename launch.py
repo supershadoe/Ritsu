@@ -36,8 +36,8 @@ except (ImportError, ModuleNotFoundError) as err:
 
 req_reinst = False
 
-if not sys.version_info >= (3, 9):
-    print("[0;1;31mError: Python version less than minimum requirement.\nRitsu bot runs on Python 3.9!+[0m")
+if not sys.version_info >= (3, 8):
+    print("[0;1;31mError: Python version less than minimum requirement.\nRitsu bot runs on Python 3.8!+[0m")
     exit(22)
 
 def inst_req():

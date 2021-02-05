@@ -10,7 +10,6 @@ __license__ = "Apache v2.0"
 
 # Imports #
 from os import system
-from zoneinfo import available_timezones
 import itertools
 import subprocess
 
@@ -127,7 +126,6 @@ Timezone: {tz}
                 return await ctx.invoke(self.bot.get_command("settings"))
         authorinfo = (ctx.author.id, ctx.channel.id, ctx.guild.id)
         embed_words = "Time zone change" if change else "User set-up"
-        timezones = available_timezones()
         msg_to_show = """Select your timezone.
 
         Type the timezone you want to select in the format of `Zone/Subzone`.
@@ -145,7 +143,7 @@ Timezone: {tz}
         try:
             reply = await self.bot.wait_for('message', check =
                     lambda m : (m.author.id, m.channel.id, m.guild.id) == authorinfo
-                    and m.content in timezones, timeout = 60.0)
+                    and m.content in utils.available_timezones, timeout = 60.0)
         except TimeoutError:
             return await ctx.send(f"No valid response received. {embed_words} aborted :(")
 

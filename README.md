@@ -25,7 +25,7 @@
 >
 > Though, keep in mind that no support would be provided from my side for the self-hosted/forked versions of the bot.
 
-This code is written to work in Python 3.9 or above and uses [discord.py](https://github.com/rapptz/discord.py) library.
+This code is written to work in Python 3.8 or above and uses [discord.py](https://github.com/rapptz/discord.py) library.
 
 Some part of the code uses Linux(more specifically GNU/Linux as some grep arguments are different in different \*nixes) commands like grep and sed.
 > People who want to use this code on other platforms are free to do so by forking this repo and changing the code to use a python-port of grep/sed or some other equivalent.
