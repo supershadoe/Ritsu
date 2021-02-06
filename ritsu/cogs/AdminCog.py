@@ -10,8 +10,7 @@ __license__ = "Apache v2.0"
 # Imports #
 import datetime
 import inspect
-import os
-import sys
+import platform
 
 from discord import Embed, version_info
 from discord.ext import commands
@@ -67,12 +66,12 @@ class AdminCog(commands.Cog, name="Admin Commands", command_attrs=dict(hidden=Tr
         "Provide stats about the host PC"
         embed = Embed(title="Stats", description=f"Bot name: {self.bot.user}", color=0xFF00FF)
         embed.add_field(name="Linux kernel version", value=platform.release(), inline=False)
-        embed.add_field(name="Python version", value=f"{'.'.join(map(str,sys.version_info[0:3]))}")
+        embed.add_field(name="Python version", value=f"{'.'.join(map(str,platform.sys.version_info[0:3]))}")
         embed.add_field(name="discord.py version", value=f"{'.'.join(map(str,version_info[0:3]))}")
         embed.add_field(name="Bot latency", value=str(int(self.bot.latency*1000)))
         embed.add_field(
                 name="Bot uptime",
-                value=str(datetime.datetime.now() - datetime.datetime.fromtimestamp(Process(os.getpid()).create_time())),
+                value=str(datetime.datetime.now() - datetime.datetime.fromtimestamp(Process(platform.os.getpid()).create_time())),
                 inline=False)
         return await ctx.send(embed=embed)
 
