@@ -1,3 +1,4 @@
 asyncio
 discord.py
 python-dateutil
+psutil
