@@ -70,7 +70,7 @@ class AdminCog(commands.Cog, name="Admin Commands", command_attrs=dict(hidden=Tr
         embed.add_field(name="discord.py version", value=f"`{'.'.join(map(str,version_info[0:3]))}`")
         embed.add_field(
                 name="Bot uptime",
-                value=f"`{str(datetime.datetime.now() - datetime.datetime.fromtimestamp(Process(platform.os.getpid()).create_time()))}`"
+                value=f"`{str(datetime.datetime.now() - datetime.datetime.fromtimestamp(Process(platform.os.getpid()).create_time()))}`",
                 inline=False)
         embed.add_field(name="Bot latency", value=f"`{str(int(self.bot.latency*1000))} ms`")
         return await ctx.send(embed=embed)
