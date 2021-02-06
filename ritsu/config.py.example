@@ -2,3 +2,8 @@
 # Add your bot token below which you get when creating a bot in discord
 # developer portal.
 bot_token = ""
+
+#Debug mode setting
+# Set to True if you want to see command failure tracebacks and other
+# verbose stuff you would need while debugging
+debug_mode =

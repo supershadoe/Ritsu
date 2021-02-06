@@ -14,8 +14,8 @@ from discord import Activity, ActivityType, Embed, Status
 from discord.ext import commands
 
 from ritsu.utils import get_file
+from ritsu.config import debug_mode
 
-debug_mode=True
 if debug_mode:
     import logging
     import traceback
