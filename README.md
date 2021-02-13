@@ -1,13 +1,18 @@
-<p align="center"><img src="https://cdn.discordapp.com/avatars/776112201734815786/102e03d63eb4381943ae28cfc91cb082.png" width="100" style="border-radius:50%"/></p>
+<p align="center">LOGO COMES HERE</p>
 <h2 align="center" style="border-bottom: none;"><b>Ritsu</b></h2>
 <h4 align="center">A Discord bot to fetch anime info from IRC bots and also notify users of new episodes.</h4>
 
 <p align="center">
-<a href="https://discord.gg/tjpCXx9RMr" alt="Discord server invite"><img src="https://discord.com/api/guilds/801170087688011828/embed.png" /></a>
+<span>[SERVER INVITE]</span>
 <a href="http://apache.org/licenses/LICENSE-2.0" alt="License: Apache"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" /></a>
 <img src="https://img.shields.io/badge/Python-3.9+-green" />
-<a href="https://discord.com/api/oauth2/authorize?client_id=776112201734815786&permissions=85056&scope=bot" alt="Bot invite link"><img src="https://img.shields.io/badge/Bot-Invite-blue" /></a>
 </p>
+<hr />
+
+<hr />
+
+**ARCHIVED FOR FUTURE CODE REFERENCE**
+
 <hr />
 
 ## Features
@@ -52,9 +57,7 @@ And voila! The bot is up and running!
 > Thus, developers need to run it on their PC 24/7 or use something like a Raspberry PI or use cloud to host it. Google about it for more info.
 
 ## Issues and PRs
-People are invited to file any issues using [GitHub](https://github.com/supershadoe/ritsu/issues) and make PRs for any change they want to see get implemented.
-
-People can also send info about any issues via the [discord server](https://discord.gg/tjpCXx9RMr) for this bot.
+Obviously you can't send a PR to an archived repo...
 
 ## License
 This app is licensed under Apache License, Version 2.0.
