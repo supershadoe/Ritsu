@@ -1,6 +1,5 @@
-# Ignoring virtualenv folder, database, config file, pycache and cache files
+guilds.py
 venv/
-database/*
-ritsu/config.py
 **/__pycache__/*
 *.pyc
+.idea/
