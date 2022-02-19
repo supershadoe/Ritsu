@@ -1,0 +1,5 @@
+guilds.py
+venv/
+**/__pycache__/*
+*.pyc
+.idea/
