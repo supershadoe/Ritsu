@@ -2,9 +2,6 @@
 
 """The main code for the new Ritsu bot written in hikari"""
 
-__author__ = "supershadoe"
-__license__ = "Apache v2.0"
-
 import aiohttp
 import asyncio
 import os
@@ -43,8 +40,7 @@ async def main() -> None:
     for component in components.__all__:
         client.add_component(getattr(components, component).copy())
 
-    await bot.start(
-        activity=hikari.Activity(name="commands", type=hikari.ActivityType.LISTENING))
+    await bot.start(activity=hikari.Activity(name="commands", type=hikari.ActivityType.LISTENING))
     await bot.join()
 
 bot = hikari.GatewayBot(os.getenv("BOT_TOKEN"))

@@ -1,8 +1,5 @@
 """Slash commands for chemistry related commands"""
 
-__author__ = "supershadoe"
-__license__ = "Apache v2.0"
-
 import aiohttp
 import hikari
 import tanjun
@@ -19,8 +16,6 @@ async def cmd_structure(
     """To fetch details of a compound from PubChem"""
 
     def gen_struct_buttons(dimensions: int) -> hikari.api.ActionRowBuilder:
-        if dimensions not in (2, 3):
-            raise ValueError("Expected values (2) or (3): There are only 2d and 3d structures.")
         return (
             bot.rest.build_action_row()
             .add_button(
@@ -77,5 +72,7 @@ async def cmd_structure(
                 )
             )
 
-component = tanjun.Component(name="chemistry").load_from_scope()
-component.make_loader()
+comp_chemistry = tanjun.Component(name="comp_chemistry").load_from_scope()
+comp_chemistry.make_loader()
+
+__all__: [str] = ['comp_chemistry']

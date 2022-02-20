@@ -2,9 +2,6 @@
 
 """Code snippet to purge all slash commands from global scope and all guilds"""
 
-__author__ = "supershadoe"
-__license__ = "Apache v2.0"
-
 import asyncio
 import hikari
 import os
@@ -21,6 +18,5 @@ async def purge_app_commands() -> None:
         # Loop to remove guild commands
         for guild in guilds:
             await rest_client.set_application_commands(application.id, [], guild)
-
 
 asyncio.run(purge_app_commands())

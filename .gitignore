@@ -1,4 +1,4 @@
-guilds.py
+ritsu/guilds.py
 venv/
 **/__pycache__/*
 *.pyc
