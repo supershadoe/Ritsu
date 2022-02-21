@@ -56,7 +56,7 @@ async def cmd_structure(
             ) as stream:
                 async for event in stream:
                     await event.interaction.create_initial_response(hikari.ResponseType.DEFERRED_MESSAGE_UPDATE)
-                    dimension = int(event.interaction.custom_id[-2])
+                    dimension: int = int(event.interaction.custom_id[-2])
                     embed.set_image(f"{image_url}{dimension}d")
                     await ctx.edit_initial_response(
                         embed=embed, component=gen_struct_buttons(2 if dimension == 3 else 3)
@@ -75,4 +75,4 @@ async def cmd_structure(
 comp_chemistry = tanjun.Component(name="comp_chemistry").load_from_scope()
 comp_chemistry.make_loader()
 
-__all__: [str] = ['comp_chemistry']
+__all__: tanjun.typing.Final[list[str]] = ['comp_chemistry']

@@ -100,4 +100,4 @@ async def cmd_shutdown(
 comp_developer = tanjun.Component(name="comp_developer").load_from_scope()
 comp_developer.make_loader()
 
-__all__: [str] = ['comp_developer']
+__all__: tanjun.typing.Final[list[str]] = ['comp_developer']
