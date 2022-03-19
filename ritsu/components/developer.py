@@ -3,7 +3,7 @@
 import hikari
 import tanjun
 
-import ritsu.components as components
+import ritsu.components
 
 
 @tanjun.as_slash_command("ping", "To check the bot latency", default_to_ephemeral=True)
@@ -19,7 +19,7 @@ async def cmd_ping(
     "invite", "To get invite link as this bot is hidden from server list", default_to_ephemeral=True
 )
 async def cmd_invite(
-    ctx: tanjun.abc.SlashContext, bot: hikari.GatewayBot = tanjun.inject(type=hikari.GatewayBot)
+        ctx: tanjun.abc.SlashContext, bot: hikari.GatewayBot = tanjun.inject(type=hikari.GatewayBot)
 ) -> None:
     """To invite the bot"""
 
@@ -38,31 +38,26 @@ async def cmd_invite(
     )
 
 
-async def autocmp_component(autocmp_ctx: tanjun.abc.AutocompleteContext, typed_str: str) -> None:
-    """Autocomplete function for the cmd_component to fill in with the components in the bot right now"""
-
-    d = {}
-    for component in components.__all__:
-        if typed_str == "" or typed_str in component:
-            d[component] = component
-    await autocmp_ctx.set_choices(d)
-
-
 @tanjun.with_owner_check
 @tanjun.with_str_slash_option(
     "operation", "What to do with the component?", choices=["Load", "Unload", "Reload"], default="Reload"
 )
-@tanjun.with_str_slash_option("component_name", "Name of component", autocomplete=autocmp_component)
+@tanjun.with_str_slash_option(
+    "component_name", "Name of component",
+    autocomplete=lambda autocmp_ctx, typed_str: autocmp_ctx.set_choices(
+        {component: component for component in ritsu.components.__all__ if typed_str == "" or typed_str in component}
+    )
+)
 @tanjun.as_slash_command("component", "Perform operations on a component", default_to_ephemeral=True)
 async def cmd_component(
-    ctx: tanjun.abc.SlashContext,
-    component_name: str,
-    operation: str,
-    client: tanjun.Client = tanjun.inject(type=tanjun.Client)
+        ctx: tanjun.abc.SlashContext,
+        component_name: str,
+        operation: str,
+        client: tanjun.Client = tanjun.inject(type=tanjun.Client)
 ) -> None:
-    """Loads a module into Tanjun client"""
+    """Takes care of loading or unloading components in tanjun"""
 
-    if component_name not in components.__all__:
+    if component_name not in ritsu.components.__all__:
         return await ctx.create_initial_response(
             content="No such component exists in this bot! \n Maybe try reloading the bot if this is a new component"
         )
@@ -70,7 +65,7 @@ async def cmd_component(
     match operation:
         case "Load":
             try:
-                client.add_component(getattr(components, component_name).copy())
+                client.add_component(getattr(ritsu.components, component_name).copy())
             except ValueError as err:
                 await ctx.create_initial_response(err)
                 return
@@ -81,7 +76,7 @@ async def cmd_component(
                 client.remove_component_by_name(component_name)
             except KeyError:
                 pass
-            client.add_component(getattr(components, component_name).copy())
+            client.add_component(getattr(ritsu.components, component_name).copy())
 
     await ctx.create_initial_response(operation + "ed the specified component")
 
@@ -97,7 +92,7 @@ async def cmd_shutdown(
     await ctx.create_initial_response("Bye-bye!")
     await bot.close()
 
-comp_developer = tanjun.Component(name="comp_developer").load_from_scope()
+comp_developer: tanjun.Component = tanjun.Component(name="comp_developer").load_from_scope()
 comp_developer.make_loader()
 
 __all__: tanjun.typing.Final[list[str]] = ['comp_developer']

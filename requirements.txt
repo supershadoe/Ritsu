@@ -1,4 +1,5 @@
 aiohttp==3.8.1
-hikari==2.0.0.dev106
-hikari-tanjun==2.4.0a1
+hikari==2.0.0.dev107
+hikari-tanjun==2.4.3a1
 uvloop==0.16.0; os_name != 'nt'
+yarl~=1.7.2

@@ -10,7 +10,14 @@
 <hr />
 
 ## Note
-Do not try to invite this bot right now as it is in a very alpha stage and also declares guild commands by default.
+Do not try to invite this bot right now as it is in a very alpha stage and also declares guild commands by default
+(thus, requires me to add the server ID in a guilds.py file).
+
+## How to run this bot
+1. Clone this repository
+2. Add your bot's token to an environment variable called `BOT_TOKEN`
+3. Also, setup a virtualenv and install dependencies from `requirements.txt`
+4. Run `ritsu/__main__.py`
 
 ## Features
 - Fetching the details of a compound from PubChem using their PUG API

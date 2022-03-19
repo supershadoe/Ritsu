@@ -6,7 +6,10 @@ import asyncio
 import hikari
 import os
 
-from guilds import guilds
+try:
+    from guilds import guilds
+except ModuleNotFoundError:
+    guilds = []
 
 
 async def purge_app_commands() -> None:

@@ -2,6 +2,9 @@
 
 """The main code for the new Ritsu bot written in hikari"""
 
+if __name__ != "__main__":
+    raise ImportError("This script isn't intended to be imported!")
+
 import aiohttp
 import asyncio
 import os
@@ -9,14 +12,14 @@ import hikari
 import tanjun
 
 import components
-from guilds import guilds
+try:
+    from guilds import guilds
+except ModuleNotFoundError:
+    guilds = False
 
 if os.name != "nt":
     import uvloop
     uvloop.install()
-
-if __name__ != "__main__":
-    raise ImportError("This script isn't intended to be imported!")
 
 
 async def main() -> None:
@@ -25,9 +28,9 @@ async def main() -> None:
     """
 
     # Using an async function just for aiohttp to not get DeprecationWarnings
-    aiohttp_session = aiohttp.ClientSession()
+    aiohttp_session: aiohttp.ClientSession = aiohttp.ClientSession()
 
-    client = (
+    client: tanjun.Client = (
         # Create a tanjun client from GatewayBot
         tanjun.Client.from_gateway_bot(bot, declare_global_commands=guilds)
         # Add a dependency of aiohttp session to reuse the same session for multiple requests
@@ -43,8 +46,8 @@ async def main() -> None:
     await bot.start(activity=hikari.Activity(name="commands", type=hikari.ActivityType.LISTENING))
     await bot.join()
 
-bot = hikari.GatewayBot(os.getenv("BOT_TOKEN"))
-loop = asyncio.get_event_loop_policy().get_event_loop()
+bot: hikari.GatewayBot = hikari.GatewayBot(os.getenv("BOT_TOKEN"))
+loop: asyncio.AbstractEventLoop = asyncio.get_event_loop_policy().get_event_loop()
 
 try:
     loop.run_until_complete(main())
