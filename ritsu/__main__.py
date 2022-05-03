@@ -11,11 +11,7 @@ import os
 import hikari
 import tanjun
 
-import components
-try:
-    from guilds import guilds
-except ModuleNotFoundError:
-    guilds = False
+import ritsu.components as components
 
 if os.name != "nt":
     import uvloop
@@ -25,17 +21,16 @@ if os.name != "nt":
 async def main() -> None:
     """
     Main function which runs the code
+
+    This asynchronous function is a blocking function which is defined due to aiohttp
+    requiring an asyncio event loop for creating a session
     """
 
-    # Using an async function just for aiohttp to not get DeprecationWarnings
     aiohttp_session: aiohttp.ClientSession = aiohttp.ClientSession()
 
     client: tanjun.Client = (
-        # Create a tanjun client from GatewayBot
-        tanjun.Client.from_gateway_bot(bot, declare_global_commands=guilds)
-        # Add a dependency of aiohttp session to reuse the same session for multiple requests
+        tanjun.Client.from_gateway_bot(bot, declare_global_commands=True)
         .set_type_dependency(aiohttp.ClientSession, aiohttp_session)
-        # Callback to close the aiohttp session when the bot shuts down
         .add_client_callback(tanjun.ClientCallbackNames.CLOSING, aiohttp_session.close)
     )
 

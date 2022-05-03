@@ -4,20 +4,20 @@
 **A discord bot to fetch information from various API**
 
 <a href="https://apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="License: Apache" align="right" /></a>
-<a href="https://discord.com/api/oauth2/authorize?client_id=776112201734815786&scope=applications.commands"><img src="https://img.shields.io/badge/Bot%20Invite-Link-blue" alt="Bot invite link" align="right" /></a>
+<a href="https://canary.discord.com/api/oauth2/authorize?client_id=776112201734815786&permissions=0&scope=bot%20applications.commands"><img src="https://img.shields.io/badge/Bot%20Invite-Link-blue" alt="Bot invite link" align="right" /></a>
 
 <img src="https://img.shields.io/badge/Python-3.10+-green" alt="Python >=3.10" align="left" />
 <hr />
 
 ## Note
-Do not try to invite this bot right now as it is in a very alpha stage and also declares guild commands by default
-(thus, requires me to add the server ID in a guilds.py file).
+Do not try to invite this bot right now as it is in a very alpha stage.
+Also, bot not maintained on a regular basis so the code that works today may not work tomorrow.
 
 ## How to run this bot
 1. Clone this repository
 2. Add your bot's token to an environment variable called `BOT_TOKEN`
 3. Also, setup a virtualenv and install dependencies from `requirements.txt`
-4. Run `ritsu/__main__.py`
+4. Run `python -m ritsu`
 
 ## Features
 - Fetching the details of a compound from PubChem using their PUG API
