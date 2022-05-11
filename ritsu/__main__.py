@@ -11,7 +11,7 @@ import os
 import hikari
 import tanjun
 
-import ritsu.components as components
+import ritsu.components
 
 if os.name != "nt":
     import uvloop
@@ -35,8 +35,8 @@ async def main() -> None:
     )
 
     # Custom importing components to later use in load/reload command
-    for component in components.__all__:
-        client.add_component(getattr(components, component).copy())
+    for component in ritsu.components.__all__:
+        client.add_component(getattr(ritsu.components, component).copy())
 
     await bot.start(activity=hikari.Activity(name="commands", type=hikari.ActivityType.LISTENING))
     await bot.join()

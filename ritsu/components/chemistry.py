@@ -1,6 +1,7 @@
 """Slash commands for chemistry related commands"""
 
 import aiohttp
+import alluka
 import hikari
 import tanjun
 import yarl
@@ -13,8 +14,8 @@ from bs4 import BeautifulSoup
 async def cmd_structure(
     ctx: tanjun.abc.SlashContext,
     compound_name: str,
-    bot: hikari.GatewayBot = tanjun.inject(type=hikari.GatewayBot),
-    session: aiohttp.ClientSession = tanjun.inject(type=aiohttp.ClientSession)
+    bot: alluka.Injected[hikari.GatewayBot],
+    session: alluka.Injected[aiohttp.ClientSession]
 ) -> None:
     """To fetch details of a compound from PubChem"""
 
@@ -55,8 +56,7 @@ async def cmd_structure(
                 content="Here's the data requested.", embed=embed, component=gen_struct_buttons(3)
             )
             with (
-                bot.stream(hikari.InteractionCreateEvent, timeout=30)
-                .filter(
+                bot.stream(hikari.InteractionCreateEvent, timeout=30).filter(
                     ("interaction.type", hikari.InteractionType.MESSAGE_COMPONENT),
                     ("interaction.component_type", hikari.ComponentType.BUTTON),
                     ("interaction.message.id", og_msg.id),
@@ -77,6 +77,7 @@ async def cmd_structure(
                 pass
         else:
             try:
+                # If PubChem returns a proper error JSON
                 error: dict = (await details_req.json())["Fault"]
                 embed: hikari.Embed = (
                     hikari.Embed(title="Error", description=f"_{error['Details'][0]}._", color=0xFF0000)
@@ -84,8 +85,7 @@ async def cmd_structure(
                     .add_field("Message", error["Message"], inline=True)
                 )
             except aiohttp.ContentTypeError:
-                # code written with salt on wounds due to discord breaking guild commands
-                # and PUG not returning proper JSON... needed to add a whole new dependency :sob:
+                # If it doesn't
                 bs_text: BeautifulSoup = BeautifulSoup(await details_req.text(), "html.parser")
                 embed: hikari.Embed = hikari.Embed(
                     title="Error", description=f"**{bs_text.title.get_text()}**", color=0xFF0000

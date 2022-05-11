@@ -1,5 +1,6 @@
 """Slash commands for some bot-dev commands"""
 
+import alluka
 import hikari
 import tanjun
 
@@ -7,9 +8,7 @@ import ritsu.components
 
 
 @tanjun.as_slash_command("ping", "To check the bot latency", default_to_ephemeral=True)
-async def cmd_ping(
-        ctx: tanjun.abc.SlashContext, bot: hikari.GatewayBot = tanjun.inject(type=hikari.GatewayBot)
-) -> None:
+async def cmd_ping(ctx: tanjun.abc.SlashContext, bot: alluka.Injected[hikari.GatewayBot]) -> None:
     """To reply to a ping command"""
 
     await ctx.create_initial_response(content=f"Pong!: The latency is **{bot.heartbeat_latency * 1000:.0f} ms**.")
@@ -27,10 +26,7 @@ async def cmd_ping(
 )
 @tanjun.as_slash_command("component", "To modify bot's components at runtime", default_to_ephemeral=True)
 async def cmd_component(
-        ctx: tanjun.abc.SlashContext,
-        component_name: str,
-        operation: str,
-        client: tanjun.Client = tanjun.inject(type=tanjun.Client)
+    ctx: tanjun.abc.SlashContext, component_name: str, operation: str, client: alluka.Injected[tanjun.Client]
 ) -> None:
     """Takes care of loading or unloading components in tanjun"""
 
