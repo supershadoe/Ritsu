@@ -2,6 +2,6 @@ aiohttp ~= 3.8.1
 alluka ~= 0.1.1
 beautifulsoup4 ~= 4.11.1
 hikari ~= 2.0.0.dev108
-hikari-tanjun ~= 2.5.1a1
+hikari-tanjun ~= 2.5.2a1
 uvloop ~= 0.16.0; os_name != 'nt'
 yarl ~= 1.7.2

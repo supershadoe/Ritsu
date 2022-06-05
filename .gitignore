@@ -6,7 +6,7 @@ __pycache__
 
 # Ignoring all vscode files except run config
 .vscode/*
-!.vscode/settings.json
+!.vscode/launch.json
 
 # Ignoring all Pycharm files except runConfiguration
 .idea/*
