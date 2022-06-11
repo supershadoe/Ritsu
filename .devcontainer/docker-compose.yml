@@ -35,7 +35,7 @@ services:
     environment:
       POSTGRES_USER: ritsu
       POSTGRES_DB: ritsu_db
-      POSTGRES_PASSWORD: ${SQL_DB_PASSWORD}
+      POSTGRES_PASSWORD: "${SQL_DB_PASSWORD}"
     # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
 

@@ -4,6 +4,7 @@ import os
 
 import aiohttp
 import alluka
+import asyncpg
 import hikari
 import tanjun
 
@@ -15,15 +16,28 @@ if os.name != "nt":
 async def tasks_startup(client: alluka.Injected[tanjun.Client]) -> None:
     """Tasks to execute while the bot starts up"""
     http_s: aiohttp.ClientSession = aiohttp.ClientSession()
-    client.set_type_dependency(aiohttp.ClientSession, http_s)
+    # Check why adding password here doesn't work (nor does psql ask for pwd)
+    db_conn: asyncpg.Connection = await asyncpg.connect(
+        "postgresql://ritsu:@localhost/ritsu_db"
+    )
+    (
+        client.set_type_dependency(aiohttp.ClientSession, http_s)
+        .set_type_dependency(asyncpg.Connection, db_conn)
+    )
+
 
 async def tasks_shutdown(
     client: alluka.Injected[tanjun.Client],
-    http_s: alluka.Injected[aiohttp.ClientSession]
+    http_s: alluka.Injected[aiohttp.ClientSession],
+    db_conn: alluka.Injected[asyncpg.Connection]
 ) -> None:
     """Tasks to execute while the bot shuts down"""
     await http_s.close()
-    client.remove_type_dependency(aiohttp.ClientSession)
+    await db_conn.close()
+    (
+        client.remove_type_dependency(aiohttp.ClientSession)
+        .remove_type_dependency(asyncpg.Connection)
+    )
 
 def start_bot() -> tuple[hikari.GatewayBot, hikari.Activity]:
     """Function to start discord bot"""

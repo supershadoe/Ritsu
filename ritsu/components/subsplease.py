@@ -65,6 +65,48 @@ async def cmd_schedule(
         component=action_row
     )
 
+@hooks.add_to_command
+@cmd_grp.with_command
+@tanjun.with_str_slash_option("resolution", "Select the resolution to use",
+    choices=("480p", "720p", "1080p")
+)
+@tanjun.with_str_slash_option("anime_name", "The name of the anime")
+@tanjun.as_slash_command(
+    "episode", "Fetch information about a particular episode of an anime"
+)
+async def cmd_episode(_: tanjun.abc.SlashContext) -> None:
+    """Command to fetch information about a particular episode of an anime"""
+
+    raise tanjun.CommandError("Not yet implemented")
+
+@hooks.add_to_command
+@cmd_grp.with_command
+@tanjun.with_str_slash_option("anime_name", "The name of anime to subscribe to")
+@tanjun.as_slash_command(
+    "subscribe",
+    "Subscribe to notifications of an ongoing anime available on subsplease"
+)
+async def cmd_subscribe(_: tanjun.abc.SlashContext) -> None:
+    "Command to subscribe to notifications of an ongoing anime"
+
+    raise tanjun.CommandError("Not yet implemented")
+
+
+@hooks.add_to_command
+@cmd_grp.with_command
+@tanjun.with_str_slash_option(
+    "anime_name", "The name of anime to unsubscribe from", choices=['1', '2']
+)
+@tanjun.as_slash_command(
+    "unsubscribe",
+    "Unsubscribe from notifications for an ongoing anime available on"
+    "subsplease"
+)
+async def cmd_unsubscribe(_: tanjun.abc.SlashContext) -> None:
+    "Command to unsubscribe from notifications of an ongoing anime"
+
+    raise tanjun.CommandError("Not yet implemented")
+
 comp_subsplease: tanjun.Component = (
     tanjun.Component(name="comp_subsplease").load_from_scope()
 )
