@@ -74,7 +74,11 @@ async def cmd_schedule(
 @tanjun.as_slash_command(
     "episode", "Fetch information about a particular episode of an anime"
 )
-async def cmd_episode(_: tanjun.abc.SlashContext) -> None:
+async def cmd_episode(
+    ctx: tanjun.abc.SlashContext,
+    anime_name: str,
+    resolution: str
+) -> None:
     """Command to fetch information about a particular episode of an anime"""
 
     raise tanjun.CommandError("Not yet implemented")
@@ -86,7 +90,10 @@ async def cmd_episode(_: tanjun.abc.SlashContext) -> None:
     "subscribe",
     "Subscribe to notifications of an ongoing anime available on subsplease"
 )
-async def cmd_subscribe(_: tanjun.abc.SlashContext) -> None:
+async def cmd_subscribe(
+    ctx: tanjun.abc.SlashContext,
+    anime_name: str
+) -> None:
     "Command to subscribe to notifications of an ongoing anime"
 
     raise tanjun.CommandError("Not yet implemented")
@@ -99,10 +106,13 @@ async def cmd_subscribe(_: tanjun.abc.SlashContext) -> None:
 )
 @tanjun.as_slash_command(
     "unsubscribe",
-    "Unsubscribe from notifications for an ongoing anime available on"
+    "Unsubscribe from notifications for an ongoing anime available on "
     "subsplease"
 )
-async def cmd_unsubscribe(_: tanjun.abc.SlashContext) -> None:
+async def cmd_unsubscribe(
+    ctx: tanjun.abc.SlashContext,
+    anime_name: str
+) -> None:
     "Command to unsubscribe from notifications of an ongoing anime"
 
     raise tanjun.CommandError("Not yet implemented")

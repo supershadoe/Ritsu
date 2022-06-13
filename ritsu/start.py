@@ -17,8 +17,9 @@ async def tasks_startup(client: alluka.Injected[tanjun.Client]) -> None:
     """Tasks to execute while the bot starts up"""
     http_s: aiohttp.ClientSession = aiohttp.ClientSession()
     # Check why adding password here doesn't work (nor does psql ask for pwd)
+    # change ritsu_db to ritsu in docker
     db_conn: asyncpg.Connection = await asyncpg.connect(
-        "postgresql://ritsu:@localhost/ritsu_db"
+        f"postgresql://ritsu:{os.getenv('SQL_DB_PASSWORD')}@/ritsu"
     )
     (
         client.set_type_dependency(aiohttp.ClientSession, http_s)
