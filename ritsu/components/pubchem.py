@@ -26,7 +26,6 @@ async def cmd_pubchem(
 ) -> None:
     """To fetch details of a compound from PubChem"""
 
-    # TODO: Add some cache to this maybe
     result = await client.injector.call_with_async_di(
         fetch_compound, compound_name
     )
