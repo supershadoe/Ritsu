@@ -8,6 +8,7 @@ days_of_week: tuple[str, ...] = (
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
 )
 
+
 async def fetch_schedule(
     session: alluka.Injected[aiohttp.ClientSession]
 ) -> dict:
@@ -18,6 +19,7 @@ async def fetch_schedule(
         if req.status == 200:
             return (await req.json(content_type="text/html"))["schedule"]
         return {"ritsu_error": (req.status, req.reason)}
+
 
 def gen_schedule_embed(schedule: dict, day_of_week: str) -> hikari.Embed:
     """To generate an embed with the schedule for that day"""
@@ -34,6 +36,7 @@ def gen_schedule_embed(schedule: dict, day_of_week: str) -> hikari.Embed:
     except KeyError:
         embed.description = "_No anime found for this day._"
     return embed
+
 
 def gen_action_row(bot: alluka.Injected[hikari.GatewayBot]) -> hikari.api.ActionRowBuilder:
     """To generate a cached ActionRowBuilder to reuse for other commands"""

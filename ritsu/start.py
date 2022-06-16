@@ -8,16 +8,15 @@ import asyncpg
 import hikari
 import tanjun
 
-import components
+import ritsu.components as comps
 
 if os.name != "nt":
     import uvloop
 
+
 async def tasks_startup(client: alluka.Injected[tanjun.Client]) -> None:
     """Tasks to execute while the bot starts up"""
     http_s: aiohttp.ClientSession = aiohttp.ClientSession()
-    # Check why adding password here doesn't work (nor does psql ask for pwd)
-    # change ritsu_db to ritsu in docker
     db_conn: asyncpg.Connection = await asyncpg.connect(
         f"postgresql://ritsu:{os.getenv('SQL_DB_PASSWORD')}@/ritsu"
     )
@@ -40,6 +39,7 @@ async def tasks_shutdown(
         .remove_type_dependency(asyncpg.Connection)
     )
 
+
 def start_bot() -> tuple[hikari.GatewayBot, hikari.Activity]:
     """Function to start discord bot"""
 
@@ -56,10 +56,10 @@ def start_bot() -> tuple[hikari.GatewayBot, hikari.Activity]:
         .add_client_callback(tanjun.ClientCallbackNames.CLOSING, tasks_shutdown)
     )
 
-    for component in components.__all__:
-        client.add_component(getattr(components, component))
+    for component in comps.__all__:
+        client.add_component(getattr(comps, component))
 
-    activity: hikari.Activity =hikari.Activity(
+    activity: hikari.Activity = hikari.Activity(
         name="commands", type=hikari.ActivityType.LISTENING
     )
 

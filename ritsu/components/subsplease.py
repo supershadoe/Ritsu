@@ -3,7 +3,7 @@ Slash commands for using subsplease API
 
 Disclaimer: This code only provides a way to communicate with the API of
 subsplease site. Procuring anime using the information from this bot is totally
-the act of the user and does not concern the bot or the bot's author in anyway.
+the act of the user and does not concern the bot or the bot's author in any way.
 """
 
 import datetime
@@ -11,8 +11,8 @@ import datetime
 import hikari
 import tanjun
 
-from handlers.subsplease import hooks
-from utils.subsplease import (
+from ritsu.handlers.subsplease import hooks
+from ritsu.utils.subsplease import (
     days_of_week, fetch_schedule, gen_schedule_embed, gen_action_row
 )
 
@@ -20,11 +20,13 @@ cmd_grp: tanjun.SlashCommandGroup = tanjun.slash_command_group(
     "subsplease", "Commands to access subsplease API"
 )
 
+
+# TODO: to make pycharm shut up about mutable default arg
 @hooks.add_to_command
 @cmd_grp.with_command
 @tanjun.with_str_slash_option(
     "day_of_week", "Day of week to fetch schedule for",
-    choices = days_of_week,
+    choices=days_of_week,
     default=days_of_week[datetime.date.today().weekday()]
 )
 @tanjun.as_slash_command(
@@ -38,7 +40,7 @@ async def cmd_schedule(
         tanjun.cached_inject(gen_action_row)
     )
 ) -> None:
-    "The main slash command function for fetching latest schedule"
+    """The main slash command function for fetching latest schedule"""
 
     if "ritsu_error" in schedule:
         err: tuple = schedule["ritsu_error"]
@@ -65,9 +67,11 @@ async def cmd_schedule(
         component=action_row
     )
 
+
 @hooks.add_to_command
 @cmd_grp.with_command
-@tanjun.with_str_slash_option("resolution", "Select the resolution to use",
+@tanjun.with_str_slash_option(
+    "resolution", "Select the resolution to use",
     choices=("480p", "720p", "1080p")
 )
 @tanjun.with_str_slash_option("anime_name", "The name of the anime")
@@ -83,6 +87,7 @@ async def cmd_episode(
 
     raise tanjun.CommandError("Not yet implemented")
 
+
 @hooks.add_to_command
 @cmd_grp.with_command
 @tanjun.with_str_slash_option("anime_name", "The name of anime to subscribe to")
@@ -94,7 +99,7 @@ async def cmd_subscribe(
     ctx: tanjun.abc.SlashContext,
     anime_name: str
 ) -> None:
-    "Command to subscribe to notifications of an ongoing anime"
+    """Command to subscribe to notifications of an ongoing anime"""
 
     raise tanjun.CommandError("Not yet implemented")
 
@@ -113,7 +118,7 @@ async def cmd_unsubscribe(
     ctx: tanjun.abc.SlashContext,
     anime_name: str
 ) -> None:
-    "Command to unsubscribe from notifications of an ongoing anime"
+    """Command to unsubscribe from notifications of an ongoing anime"""
 
     raise tanjun.CommandError("Not yet implemented")
 

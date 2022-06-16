@@ -4,11 +4,12 @@ import alluka
 import hikari
 import tanjun
 
-from utils.subsplease import (
+from ritsu.utils.subsplease import (
     fetch_schedule, gen_schedule_embed, gen_action_row
 )
 
 hooks = tanjun.SlashHooks()
+
 
 @hooks.with_on_success
 async def handle_inters(
@@ -39,11 +40,12 @@ async def handle_inters(
     except hikari.NotFoundError:
         pass
 
+
 @hooks.with_on_error
 async def handle_errors(ctx: tanjun.abc.SlashContext, err: Exception) -> None:
     """Callback for a hook to handle errors while responding to interactions"""
     await ctx.respond(
-        content="An error occured while executing the command",
+        content="An error occurred while executing the command",
         embed=hikari.Embed(
             title="Error",
             description=err,

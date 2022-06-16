@@ -5,9 +5,10 @@ import hikari
 import tanjun
 import yarl
 
-from utils.pubchem import gen_action_row
+from ritsu.utils.pubchem import gen_action_row
 
 hooks = tanjun.SlashHooks()
+
 
 @hooks.with_on_success
 async def handle_inters(
@@ -17,7 +18,7 @@ async def handle_inters(
         tanjun.cached_inject(gen_action_row)
     )
 ) -> None:
-    "Callback for a hook to handle interactions after a message"
+    """Callback for a hook to handle interactions after a message"""
 
     og_msg: hikari.Message = await ctx.fetch_initial_response()
     embed: hikari.Embed = og_msg.embeds[0]
@@ -32,9 +33,12 @@ async def handle_inters(
         async for event in stream:
             flag: int = int(event.interaction.custom_id[-1])
             embed.set_image(str(
-                image_url.update_query(record_type=f"{flag+2}d")
+                image_url.update_query(record_type=f"{flag + 2}d")
             ))
-            action_row.components[flag^1].set_is_disabled(False)
+            # If your compiler/type checker screams about components being a
+            # seq[ComponentBuilder] instead of seq[ButtonBuilder],
+            # it's not my problem (Maybe suggest a way if you know one)
+            action_row.components[flag ^ 1].set_is_disabled(False)
             action_row.components[flag].set_is_disabled(True)
             await event.interaction.create_initial_response(
                 response_type=hikari.ResponseType.MESSAGE_UPDATE,
@@ -47,12 +51,13 @@ async def handle_inters(
     except hikari.NotFoundError:
         pass
 
+
 @hooks.with_on_error
 async def handle_errors(ctx: tanjun.abc.SlashContext, err: Exception) -> None:
-    "Callback for a hook to handle errors while responding to an interaction"
+    """Callback for a hook to handle errors while responding to an interaction"""
 
     await ctx.respond(
-        content="An error occured while executing the command",
+        content="An error occurred while executing the command",
         embed=hikari.Embed(
             title="Error",
             description=err,

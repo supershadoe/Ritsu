@@ -15,6 +15,7 @@ req_properties: tuple[str, ...] = (
     "Title", "IUPACName", "MolecularFormula", "MolecularWeight", "Charge"
 )
 
+
 async def fetch_compound(
     compound_name: str, session: alluka.Injected[aiohttp.ClientSession]
 ) -> dict[str, Any]:
@@ -29,16 +30,17 @@ async def fetch_compound(
             return (await req.json())["PropertyTable"]["Properties"][0]
         try:
             # If PubChem returns a proper JSON indicating error
-            error: dict = await (req.json())["Fault"]
+            error: dict = (await req.json())["Fault"]
             return {"ritsu_error": (req.status, error)}
         except aiohttp.ContentTypeError:
             # If it doesn't
             bs_text: BeautifulSoup = BeautifulSoup(
                 await req.text(), "html.parser"
             )
-            return {"ritsu_error", (req.status, bs_text.title.get_text())}
+            return {"ritsu_error": (req.status, bs_text.title.get_text())}
 
-def gen_compound_embed(details: dict[str, str|int]) -> hikari.Embed:
+
+def gen_compound_embed(details: dict[str, str | int]) -> hikari.Embed:
     """To generate embed for showing details of a compound"""
 
     image_url: yarl.URL = (
@@ -59,13 +61,14 @@ def gen_compound_embed(details: dict[str, str|int]) -> hikari.Embed:
 
     return embed
 
+
 def gen_action_row(
     bot: alluka.Injected[hikari.GatewayBot]
-)-> hikari.api.ActionRowBuilder:
+) -> hikari.api.ActionRowBuilder:
     """To generate a tuple of action rows to be cached for later use"""
 
     action_row: hikari.api.ActionRowBuilder = bot.rest.build_action_row()
-    buttons: tuple[tuple[int, str]] = ((2, "⬜"), (3 ,"🧊"))
+    buttons: tuple[tuple[int, str], ...] = ((2, "⬜"), (3, "🧊"))
     for index, button in enumerate(buttons):
         action_row: hikari.api.ActionRowBuilder = (
             action_row

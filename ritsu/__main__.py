@@ -2,7 +2,7 @@
 
 """The main code for the new Ritsu bot written in hikari"""
 
-from start import start_bot
+from ritsu.start import start_bot
 
 if __name__ != "__main__":
     raise ImportError("This script isn't intended to be imported!")
