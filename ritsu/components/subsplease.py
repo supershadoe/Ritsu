@@ -7,6 +7,7 @@ the act of the user and does not concern the bot or the bot's author in any way.
 """
 
 import datetime
+from typing import Any, Final, ItemsView
 
 import hikari
 import tanjun
@@ -21,7 +22,6 @@ cmd_grp: tanjun.SlashCommandGroup = tanjun.slash_command_group(
 )
 
 
-# TODO: to make pycharm shut up about mutable default arg
 @hooks.add_to_command
 @cmd_grp.with_command
 @tanjun.with_str_slash_option(
@@ -35,7 +35,7 @@ cmd_grp: tanjun.SlashCommandGroup = tanjun.slash_command_group(
 async def cmd_schedule(
     ctx: tanjun.abc.SlashContext,
     day_of_week: str,
-    schedule: dict = tanjun.cached_inject(fetch_schedule, expire_after=300),
+    schedule: ItemsView | tuple[str, tuple[int, Any]] = tanjun.cached_inject(fetch_schedule, expire_after=300),
     action_row: hikari.api.ActionRowBuilder = (
         tanjun.cached_inject(gen_action_row)
     )
@@ -127,4 +127,4 @@ comp_subsplease: tanjun.Component = (
 )
 comp_subsplease.make_loader()
 
-__all__: tanjun.typing.Final[list[str]] = ["comp_subsplease"]
+__all__: Final[list[str]] = ["comp_subsplease"]

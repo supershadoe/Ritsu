@@ -1,5 +1,7 @@
 """Helper functions for subsplease component"""
 
+from typing import Any, ItemsView
+
 import aiohttp
 import alluka
 import hikari
@@ -11,19 +13,21 @@ days_of_week: tuple[str, ...] = (
 
 async def fetch_schedule(
     session: alluka.Injected[aiohttp.ClientSession]
-) -> dict:
+) -> ItemsView | tuple[str, tuple[int, Any]]:
     """Async function to fetch the latest release schedule from subsplease"""
 
     subsplease_url: str = "https://subsplease.org/api/?f=schedule&tz=UTC"
     async with session.get(subsplease_url) as req:
         if req.status == 200:
-            return (await req.json(content_type="text/html"))["schedule"]
-        return {"ritsu_error": (req.status, req.reason)}
+            schedule: dict = (await req.json(content_type="text/html"))["schedule"]
+            return schedule.items()
+        return "ritsu_error", (req.status, req.reason)
 
 
-def gen_schedule_embed(schedule: dict, day_of_week: str) -> hikari.Embed:
+def gen_schedule_embed(schedule: ItemsView, day_of_week: str) -> hikari.Embed:
     """To generate an embed with the schedule for that day"""
 
+    schedule: dict = dict(schedule)
     embed: hikari.Embed = hikari.Embed(title=f"Schedule for {day_of_week}")
     description: str = ""
     try:
