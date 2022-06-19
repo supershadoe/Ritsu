@@ -5,8 +5,7 @@
             "name": "Python: Start discord bot",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ritsu",
-            "console": "integratedTerminal",
+            "module": "ritsu",
             "justMyCode": true
         }
     ]
