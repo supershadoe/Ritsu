@@ -4,8 +4,8 @@ import typing as _typing
 from .pubchem import *
 from .subsplease import *
 
-__all__: _typing.Final[list[str]] = [
+__all__: _typing.Final[tuple[str, ...]] = (
     name for name in dir() if name.startswith("comp_")
-]
+)
 
 del _typing
