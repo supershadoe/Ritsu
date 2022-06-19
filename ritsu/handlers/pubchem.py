@@ -1,5 +1,7 @@
 """Handlers for commands in pubchem component"""
 
+import typing
+
 import alluka
 import hikari
 import tanjun
@@ -35,11 +37,11 @@ async def handle_inters(
             embed.set_image(str(
                 image_url.update_query(record_type=f"{flag + 2}d")
             ))
-            # If your compiler/type checker screams about components being a
-            # seq[ComponentBuilder] instead of seq[ButtonBuilder],
-            # it's not my problem (Maybe suggest a way if you know one)
-            action_row.components[flag ^ 1].set_is_disabled(False)
-            action_row.components[flag].set_is_disabled(True)
+            buttons = typing.cast(
+                typing.Sequence[hikari.api.ButtonBuilder], action_row.components
+            )
+            buttons[flag ^ 1].set_is_disabled(False)
+            buttons[flag].set_is_disabled(True)
             await event.interaction.create_initial_response(
                 response_type=hikari.ResponseType.MESSAGE_UPDATE,
                 embed=embed,
