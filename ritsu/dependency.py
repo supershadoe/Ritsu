@@ -8,6 +8,7 @@ import abc
 import typing
 
 import alluka
+from typing_extensions import Self
 
 class DependencyProto(abc.ABC):
     """A dependency with a loader and unloader to be used with alluka"""
@@ -15,17 +16,21 @@ class DependencyProto(abc.ABC):
     dep_cls: typing.Type[typing.Any]
     __slots__: tuple[str] = ("dep_cls",)
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    async def loader(client: alluka.InjectedDescriptor) -> None:
+    async def loader(
+        cls: typing.Type[Self], client: alluka.InjectedDescriptor
+    ) -> None:
         """
         A helper function to initialize the dependency and set a type dependency
         in tanjun/alluka.
         """
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    async def unloader(client: alluka.InjectedDescriptor) -> None:
+    async def unloader(
+        cls: typing.Type[Self], client: alluka.InjectedDescriptor
+    ) -> None:
         """
         A helper function to gracefully remove the dependency from tanjun/alluka
         """
