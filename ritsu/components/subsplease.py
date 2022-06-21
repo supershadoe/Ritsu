@@ -122,9 +122,8 @@ async def cmd_unsubscribe(
 
     raise tanjun.CommandError("Not yet implemented")
 
-comp_subsplease: tanjun.Component = (
-    tanjun.Component(name="comp_subsplease").load_from_scope()
+loader_subsplease: tanjun.abc.ClientLoader = (
+    tanjun.Component(name="Subsplease").load_from_scope().make_loader()
 )
-comp_subsplease.make_loader()
 
-__all__: Final[list[str]] = ["comp_subsplease"]
+__all__: Final[list[str]] = ["loader_subsplease"]

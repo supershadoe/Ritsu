@@ -70,7 +70,8 @@ async def cmd_pubchem(
         component=action_row
     )
 
-comp_pubchem: tanjun.Component = tanjun.Component(name="comp_pubchem").load_from_scope()
-comp_pubchem.make_loader()
+loader_pubchem: tanjun.abc.ClientLoader = (
+    tanjun.Component(name="PubChem").load_from_scope().make_loader()
+)
 
-__all__: tanjun.typing.Final[list[str]] = ['comp_pubchem']
+__all__: tanjun.typing.Final[list[str]] = ["loader_pubchem"]

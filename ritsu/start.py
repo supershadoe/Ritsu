@@ -7,7 +7,6 @@ import alluka
 import hikari
 import tanjun
 
-import ritsu.components as comps
 import ritsu.dependencies as deps
 from ritsu.dependency import DependencyProto
 
@@ -43,14 +42,12 @@ def start_bot() -> tuple[hikari.GatewayBot, hikari.Activity]:
         os.getenv("BOT_TOKEN_TEST") or os.getenv("BOT_TOKEN_PROD")
     )
 
-    client: tanjun.Client = (
+    (
         tanjun.Client.from_gateway_bot(bot, declare_global_commands=True)
         .add_client_callback(tanjun.ClientCallbackNames.STARTING, tasks_startup)
         .add_client_callback(tanjun.ClientCallbackNames.CLOSING, tasks_shutdown)
+        .load_modules("ritsu.components")
     )
-
-    for component in comps.__all__:
-        client.add_component(getattr(comps, component))
 
     activity: hikari.Activity = hikari.Activity(
         name="commands", type=hikari.ActivityType.LISTENING
