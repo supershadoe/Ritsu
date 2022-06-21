@@ -8,6 +8,13 @@ from ritsu.handlers.pubchem import hooks
 from ritsu.utils.pubchem import fetch_compound, gen_compound_embed, gen_action_row
 
 
+@tanjun.with_cooldown(
+    "comp_pubchem",
+    error_message=(
+        "This command is currently under cooldown to comply with Pubchem's API "
+        "usage policy and to not overload their servers.\nTry again {cooldown}."
+    )
+)
 @hooks.add_to_command
 @tanjun.with_str_slash_option(
     "compound_name", "Try to use IUPAC Name for accurate results"
@@ -52,7 +59,7 @@ async def cmd_pubchem(
             content=(
                 "Oh no! An error has occurred while trying to fetch the "
                 "required data! :fearful:\nTry again later :pensive:"
-                "\n\n_Or contact the bot developer for debugging_"
+                "\n\n_Or contact the bot developer for debugging._"
             )
         )
         return
