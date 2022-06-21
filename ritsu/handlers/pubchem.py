@@ -26,6 +26,10 @@ async def handle_inters(
     embed: hikari.Embed = og_msg.embeds[0]
     image_url: yarl.URL = yarl.URL(embed.image.url)
 
+    flag: int = 1
+    # For disabling the button even if no interaction was made afterwards by the
+    # user
+
     with bot.stream(hikari.InteractionCreateEvent, timeout=30).filter(
         ("interaction.type", hikari.InteractionType.MESSAGE_COMPONENT),
         ("interaction.component_type", hikari.ComponentType.BUTTON),

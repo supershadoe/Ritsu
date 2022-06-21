@@ -68,13 +68,13 @@ def gen_action_row(
     """To generate a tuple of action rows to be cached for later use"""
 
     action_row: hikari.api.ActionRowBuilder = bot.rest.build_action_row()
-    buttons: tuple[tuple[int, str], ...] = ((2, "⬜"), (3, "🧊"))
+    buttons: tuple[str, str] = ("⬜", "🧊")
     for index, button in enumerate(buttons):
         action_row: hikari.api.ActionRowBuilder = (
             action_row
             .add_button(hikari.ButtonStyle.PRIMARY, f"chem-struct-{index}")
-            .set_emoji(button[1])
-            .set_label(f"Show {button[0]}D Structure")
+            .set_emoji(button)
+            .set_label(f"Show {index + 2}D Structure")
             .add_to_container()
         )
     action_row.components[0].set_is_disabled(True)
