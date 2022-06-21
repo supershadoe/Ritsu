@@ -3,11 +3,11 @@
 import logging
 import os
 import typing
-from typing_extensions import Self
 
 import alluka
 import asyncpg
 import tanjun
+from typing_extensions import Self
 
 from ritsu.dependency import DependencyProto
 

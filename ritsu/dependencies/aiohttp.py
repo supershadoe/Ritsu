@@ -1,11 +1,11 @@
 """Functions to initialize and close aiohttp session"""
 
 import typing
-from typing_extensions import Self
 
 import aiohttp
 import alluka
 import tanjun
+from typing_extensions import Self
 
 from ritsu.dependency import DependencyProto
 
