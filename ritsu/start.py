@@ -1,43 +1,36 @@
 """Code to initialize the discord bot"""
 
 import os
+import typing
 
-import aiohttp
 import alluka
-import asyncpg
 import hikari
 import tanjun
 
 import ritsu.components as comps
+import ritsu.dependencies as deps
+from ritsu.dependency import DependencyProto
 
 if os.name != "nt":
     import uvloop
 
-
 async def tasks_startup(client: alluka.Injected[tanjun.Client]) -> None:
     """Tasks to execute while the bot starts up"""
-    http_s: aiohttp.ClientSession = aiohttp.ClientSession()
-    db_conn: asyncpg.Connection = await asyncpg.connect(
-        f"postgresql://ritsu:{os.getenv('SQL_DB_PASSWORD')}@/ritsu"
-    )
-    (
-        client.set_type_dependency(aiohttp.ClientSession, http_s)
-        .set_type_dependency(asyncpg.Connection, db_conn)
-    )
+
+    for dep in deps.__all__:
+        dependency: DependencyProto = typing.cast(
+            DependencyProto, getattr(deps, dep)
+        )
+        await client.injector.call_with_async_di(dependency.loader)
 
 
-async def tasks_shutdown(
-    client: alluka.Injected[tanjun.Client],
-    http_s: alluka.Injected[aiohttp.ClientSession],
-    db_conn: alluka.Injected[asyncpg.Connection]
-) -> None:
+async def tasks_shutdown(client: alluka.Injected[tanjun.Client]) -> None:
     """Tasks to execute while the bot shuts down"""
-    await http_s.close()
-    await db_conn.close()
-    (
-        client.remove_type_dependency(aiohttp.ClientSession)
-        .remove_type_dependency(asyncpg.Connection)
-    )
+    for dep in deps.__all__:
+        dependency: DependencyProto = typing.cast(
+            DependencyProto, getattr(deps, dep)
+        )
+        await client.injector.call_with_async_di(dependency.unloader)
 
 
 def start_bot() -> tuple[hikari.GatewayBot, hikari.Activity]:
