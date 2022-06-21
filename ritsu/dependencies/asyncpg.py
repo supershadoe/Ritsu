@@ -7,6 +7,7 @@ import typing
 import alluka
 import asyncpg
 import tanjun
+from alluka.abc import UNDEFINED
 from typing_extensions import Self
 
 from ritsu.dependency import DependencyProto
@@ -46,8 +47,8 @@ class AsyncpgDep(DependencyProto):
     ) -> None:
         """To unload the dependency"""
         dep_cls: typing.Type[cls.dep_cls] = cls.dep_cls
-        db_conn: asyncpg.Connection = client.get_type_dependency(dep_cls)
-        await db_conn.close()
-        client.remove_type_dependency(dep_cls)
+        if (db_conn := client.get_type_dependency(dep_cls)) is not UNDEFINED:
+            await db_conn.close()
+            client.remove_type_dependency(dep_cls)
 
 __all__: typing.Final[tuple[str]] = ("AsyncpgDep",)
