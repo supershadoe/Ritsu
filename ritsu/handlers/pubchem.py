@@ -24,8 +24,11 @@ async def handle_inters(
 
     og_msg: hikari.Message = await ctx.fetch_initial_response()
     embed: hikari.Embed = og_msg.embeds[0]
-    image_url: yarl.URL = yarl.URL(embed.image.url)
 
+    if embed.title == "Error":
+        return
+
+    image_url: yarl.URL = yarl.URL(embed.image.url)
     flag: int = 1
     # For disabling the button even if no interaction was made afterwards by the
     # user

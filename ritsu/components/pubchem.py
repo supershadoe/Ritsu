@@ -31,7 +31,7 @@ async def cmd_pubchem(
     )
     if "ritsu_error" in result:
         err: tuple = result["ritsu_error"]
-        if isinstance(dict, err[1]):
+        if isinstance(err[1], dict):
             error: dict = err[1]
             embed: hikari.Embed = (
                 hikari.Embed(
