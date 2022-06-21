@@ -126,4 +126,4 @@ loader_subsplease: tanjun.abc.ClientLoader = (
     tanjun.Component(name="Subsplease").load_from_scope().make_loader()
 )
 
-__all__: Final[list[str]] = ["loader_subsplease"]
+__all__: Final[tuple[str]] = ("loader_subsplease",)

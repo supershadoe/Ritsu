@@ -74,4 +74,4 @@ loader_pubchem: tanjun.abc.ClientLoader = (
     tanjun.Component(name="PubChem").load_from_scope().make_loader()
 )
 
-__all__: tanjun.typing.Final[list[str]] = ["loader_pubchem"]
+__all__: tanjun.typing.Final[tuple[str]] = ("loader_pubchem",)
