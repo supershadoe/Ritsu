@@ -13,8 +13,9 @@ import hikari
 import tanjun
 
 from ritsu.handlers.subsplease import hooks
+from ritsu.utils.common import days_of_week
 from ritsu.utils.subsplease import (
-    days_of_week, fetch_schedule, gen_schedule_embed, gen_action_row
+    fetch_schedule, gen_schedule_embed, gen_action_row
 )
 
 cmd_grp: tanjun.SlashCommandGroup = tanjun.slash_command_group(
@@ -35,7 +36,9 @@ cmd_grp: tanjun.SlashCommandGroup = tanjun.slash_command_group(
 async def cmd_schedule(
     ctx: tanjun.abc.SlashContext,
     day_of_week: str,
-    schedule: ItemsView | tuple[str, tuple[int, Any]] = tanjun.cached_inject(fetch_schedule, expire_after=300),
+    schedule: ItemsView | tuple[str, tuple[int, Any]] = (
+        tanjun.cached_inject(fetch_schedule, expire_after=300)
+    ),
     action_row: hikari.api.ActionRowBuilder = (
         tanjun.cached_inject(gen_action_row)
     )

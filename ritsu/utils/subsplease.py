@@ -6,10 +6,7 @@ import aiohttp
 import alluka
 import hikari
 
-days_of_week: tuple[str, ...] = (
-    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-)
-
+from ritsu.utils.common import days_of_week
 
 async def fetch_schedule(
     session: alluka.Injected[aiohttp.ClientSession]
@@ -42,7 +39,9 @@ def gen_schedule_embed(schedule: ItemsView, day_of_week: str) -> hikari.Embed:
     return embed
 
 
-def gen_action_row(bot: alluka.Injected[hikari.GatewayBot]) -> hikari.api.ActionRowBuilder:
+def gen_action_row(
+    bot: alluka.Injected[hikari.GatewayBot]
+) -> hikari.api.ActionRowBuilder:
     """To generate a cached ActionRowBuilder to reuse for other commands"""
 
     action_row: hikari.api.ActionRowBuilder = bot.rest.build_action_row()

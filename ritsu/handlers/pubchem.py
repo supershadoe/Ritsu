@@ -37,7 +37,8 @@ async def handle_inters(
         ("interaction.type", hikari.InteractionType.MESSAGE_COMPONENT),
         ("interaction.component_type", hikari.ComponentType.BUTTON),
         ("interaction.message.id", og_msg.id),
-        ("interaction.user", ctx.author)
+        ("interaction.user", ctx.author),
+        lambda e: e.interaction.custom_id.startswith("chem-struct-")
     ) as stream:
         async for event in stream:
             flag: int = int(event.interaction.custom_id[-1])
