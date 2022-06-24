@@ -65,7 +65,7 @@ async def cmd_pubchem(
         return
 
     await ctx.edit_initial_response(
-        "Here's the release schedule of SubsPlease.",
+        f"Here's the data found for '{compound_name}'.",
         embed=gen_compound_embed(result),
         component=action_row
     )
