@@ -10,25 +10,29 @@
 <hr />
 
 ## Note
-Do not try to invite this bot right now as it is in a very alpha stage.
-Also, bot not maintained on a regular basis so the code that works today may not work tomorrow.
+The bot isn't maintained on a regular basis and also in a very alpha stage so
+code that works today may not work tomorrow.
 
 ## How to run this bot
 1. Clone this repository
-2. Add your bot's token to an environment variable called `BOT_TOKEN`
+2. Add your bot's token to an environment variable called `BOT_TOKEN_PROD`
 3. Also, setup a virtualenv and install dependencies from `requirements.txt`
 4. Run `python -m ritsu`
 
 ## Features
 - Fetching the details of a compound from PubChem using their PUG API
-- Nothing else rn 😅
+- Fetching release schedule of SubsPlease using their API
+- More to come
+
+(very niche stuff ik)
 
 ## FAQ
 ### Why aren't you using a RESTBot?
-Because I can't host an HTTP server.
+Because I can't get a domain name right now to add to discord as interaction
+server.
 ### Will there be more features coming up?
 Yeah, but not soon. Can't promise when or what.
 ### Why is the code Python (>=3.10)?
-That's because I use Arch, and it's just simpler for me to use that.
-And also because, I wanted to try those new stuff like match-case.
+Because it would be annoying to use `typing.Union[T1, T2]` instead of
+`T1 | T2`.
 

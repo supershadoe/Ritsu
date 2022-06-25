@@ -12,5 +12,5 @@ __pycache__
 .idea/*
 !.idea/runConfigurations/*
 
-# Ignore BOT_TOKEN
-.env
+# Ignore .deploy
+.deploy
