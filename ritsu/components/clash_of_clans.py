@@ -205,7 +205,7 @@ async def cmd_sync_user(
                 "Not allowed to modify data on behalf of other users "
                 "while not being a moderator."
             )
-        )()
+        )(ctx)
 
     user_tag: str = user_tag.upper()
     if re.match(r"^#[A-Z\d]{9}$", user_tag) is None:
