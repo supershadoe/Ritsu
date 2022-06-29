@@ -83,7 +83,7 @@ async def cmd_sync_roles_with_coc(
     await ctx.edit_initial_response(msg)
     await client.injector.call_with_async_di(
         add_roles_to_db, ctx, [
-            int(opt.resolve_to_role().id) for opt in options.values() if opt
+            int(opt.resolve_to_role().id) for opt in options.values()
         ]
     )
     await ctx.edit_initial_response(f"{msg}\nSynced!")
@@ -178,16 +178,34 @@ async def cmd_remove_clan_tag(
         "Bot doesn't have these required permissions: {missing_permissions}"
     )
 )
-@tanjun.with_str_slash_option("user_tag", "The tag of your COC account")
+@tanjun.with_member_slash_option(
+    "member", "Server member to link",
+    default=None
+)
+@tanjun.with_str_slash_option("user_tag", "The tag of COC account")
 @tanjun.as_slash_command(
     "sync_user", "To sync discord user with data from COC"
 )
 async def cmd_sync_user(
     ctx: tanjun.abc.SlashContext,
     user_tag: str,
+    member: hikari.Member,
     client: alluka.Injected[tanjun.Client]
 ) -> None:
     """Command to sync server nick and role with COC"""
+    if member is None:
+        member: hikari.InteractionMember = ctx.member
+    else:
+        await tanjun.checks.AuthorPermissionCheck(
+            (
+                hikari.Permissions.MANAGE_ROLES
+                | hikari.Permissions.MANAGE_NICKNAMES
+            ),
+            error_message=(
+                "Not allowed to modify data on behalf of other users "
+                "while not being a moderator."
+            )
+        )()
 
     user_tag: str = user_tag.upper()
     if re.match(r"^#[A-Z\d]{9}$", user_tag) is None:
@@ -196,6 +214,23 @@ async def cmd_sync_user(
             "(including the #)."
         )
     await ctx.defer()
+
+    role_names: tuple[str, ...] = ("member", "elder", "coLeader", "leader")
+    clan_info: typing.Optional[tuple[str, str]] = (
+        await client.injector.call_with_async_di(fetch_tag_for_guild, ctx)
+    )
+    if clan_info is None:
+        raise tanjun.CommandError(
+            "Run `/coc set_clan_tag` first (or ask a mod to) to setup "
+            "this guild."
+        )
+    roles: typing.Optional[list[int]] = (
+        await client.injector.call_with_async_di(fetch_roles_for_guild, ctx)
+    )
+    if clan_info is None:
+        raise tanjun.CommandError(
+            "Run `/coc sync_roles_with_guild` and then run this."
+        )
 
     user_info: dict = await client.injector.call_with_async_di(
         fetch_coc_info, coc_api / "players" / user_tag
@@ -206,18 +241,27 @@ async def cmd_sync_user(
             handle_errors, user_info, user_tag
         )
 
-    clan_info: dict[str, typing.Any] = user_info["clan"]
-    clan_tag: str = clan_info["tag"]
-    clan_name: str = clan_info["name"]
-    clan_level: str = clan_info["clanLevel"]
-    user_name: str = user_info["name"]
-    await ctx.edit_initial_response(
-        f"Found clan _{user_name}_ for the tag {user_tag}!\n"
-        "Added the clan to the database!\n\n"
-        f"Now, you can use `/coc sync_user user:@{ctx.author.username}` to sync "
-        "your clan roles and nickname with this server.",
-        components=None
+    if user_info["clan"]["tag"] != clan_info[0]:
+        raise tanjun.CommandError(
+            "Member's current clan isn't the same as the guild's."
+        )
+    await member.add_role(
+        roles[role_names.index(user_info["role"])],
+        reason="To sync with COC"
     )
+    try:
+        await member.edit(
+            nickname=f"({user_info['name']}) {member.nickname}",
+            reason="To sync with COC"
+        )
+    except hikari.ForbiddenError:
+        raise tanjun.CommandError(
+            "Added role but cannot edit nickname of member!\n\n"
+            "Bot's highest role should be above the member's highest role "
+            "in the bot hierarchy.\n\n"
+            "> Note: This command also fails if the member is the server owner."
+        )
+    await ctx.edit_initial_response("Edited the user!")
 
 
 comp_coc: tanjun.Component = (

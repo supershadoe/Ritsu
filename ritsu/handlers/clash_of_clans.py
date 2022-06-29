@@ -164,14 +164,11 @@ async def create_roles_to_sync(
         await _disable_components(ctx, action_row)
 
 
-async def handle_errors(clan_info: dict, clan_tag: str) -> None:
+async def handle_errors(clan_info: dict, tag: str) -> None:
     """To handle errors from COC API for set_clan_tag command"""
     err: tuple[int, dict] = clan_info["ritsu_error"]
     if err[0] == 404:
-        raise tanjun.CommandError(
-            f"No clan found with the tag {clan_tag}.\nThus, there is no clan "
-            "linked to this guild right now in the database."
-        )
+        raise tanjun.CommandError(f"User/Clan of tag {tag} Not found")
     elif err[0] == 500:
         raise tanjun.CommandError(
             "Some server error on Supercell's side\n"
