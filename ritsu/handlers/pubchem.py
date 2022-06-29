@@ -41,7 +41,8 @@ async def handle_inters(
         lambda e: e.interaction.custom_id.startswith("chem-struct-")
     ) as stream:
         async for event in stream:
-            flag: int = int(event.interaction.custom_id[-1])
+            interaction = typing.cast(hikari.ComponentInteraction, event.interaction)
+            flag: int = int(interaction.custom_id[-1])
             embed.set_image(str(
                 image_url.update_query(record_type=f"{flag + 2}d")
             ))
@@ -50,7 +51,7 @@ async def handle_inters(
             )
             buttons[flag ^ 1].set_is_disabled(False)
             buttons[flag].set_is_disabled(True)
-            await event.interaction.create_initial_response(
+            await interaction.create_initial_response(
                 response_type=hikari.ResponseType.MESSAGE_UPDATE,
                 embed=embed,
                 component=action_row

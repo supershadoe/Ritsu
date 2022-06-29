@@ -13,6 +13,7 @@ from ritsu.dependency import DependencyProto
 if os.name != "nt":
     import uvloop
 
+
 async def tasks_startup(client: alluka.Injected[tanjun.Client]) -> None:
     """Tasks to execute while the bot starts up"""
 

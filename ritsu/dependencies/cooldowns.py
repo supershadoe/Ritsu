@@ -12,12 +12,11 @@ from typing_extensions import Self
 
 from ritsu.dependency import DependencyProto
 
+
 class CooldownsDep(DependencyProto):
     """A dependency with a loader and unloader to be used with alluka"""
 
-    dep_cls: typing.Type[tanjun.InMemoryCooldownManager] = (
-        tanjun.InMemoryCooldownManager
-    )
+    dep_cls = tanjun.InMemoryCooldownManager
 
     @classmethod
     async def loader(

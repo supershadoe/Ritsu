@@ -114,8 +114,10 @@ async def cmd_subscribe(
 )
 @tanjun.as_slash_command(
     "unsubscribe",
-    "Unsubscribe from notifications for an ongoing anime available on "
-    "subsplease"
+    (
+        "Unsubscribe from notifications for an ongoing anime available on "
+        "subsplease"
+    )
 )
 async def cmd_unsubscribe(
     ctx: tanjun.abc.SlashContext,

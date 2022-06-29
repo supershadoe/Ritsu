@@ -10,10 +10,11 @@ from typing_extensions import Self
 
 from ritsu.dependency import DependencyProto
 
+
 class AiohttpDep(DependencyProto):
     """A class to represent aiohttp dependency"""
 
-    dep_cls: typing.Type[aiohttp.ClientSession] = aiohttp.ClientSession
+    dep_cls = aiohttp.ClientSession
 
     @classmethod
     async def loader(
@@ -32,5 +33,6 @@ class AiohttpDep(DependencyProto):
         if (http_s := client.get_type_dependency(dep_cls)) is not UNDEFINED:
             await http_s.close()
             client.remove_type_dependency(dep_cls)
+
 
 __all__: tanjun.typing.Final[tuple[str]] = ("AiohttpDep",)

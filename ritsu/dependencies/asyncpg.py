@@ -16,7 +16,7 @@ from ritsu.dependency import DependencyProto
 class AsyncpgDep(DependencyProto):
     """A class to represent asyncpg dependency"""
 
-    dep_cls: typing.Type[asyncpg.Connection] = asyncpg.Connection
+    dep_cls = asyncpg.Connection
 
     @classmethod
     async def loader(
@@ -34,7 +34,7 @@ class AsyncpgDep(DependencyProto):
                     "Cannot connect to database for whatever reason. "
                     "Check if the database is online.\n"
                     "%s", error,
-                    exc_info=1
+                    exc_info=error
                 )
         else:
             raise ConnectionError(
@@ -50,5 +50,6 @@ class AsyncpgDep(DependencyProto):
         if (db_conn := client.get_type_dependency(dep_cls)) is not UNDEFINED:
             await db_conn.close()
             client.remove_type_dependency(dep_cls)
+
 
 __all__: typing.Final[tuple[str]] = ("AsyncpgDep",)
