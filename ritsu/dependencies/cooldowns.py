@@ -26,6 +26,7 @@ class CooldownsDep(DependencyProto):
         (
             cls.dep_cls()
             .set_bucket("comp_pubchem", tanjun.BucketResource.GLOBAL, 5, 1)
+            .set_bucket("comp_coc", tanjun.BucketResource.GLOBAL, 10, 1)
             .add_to_client(client)
         )
 

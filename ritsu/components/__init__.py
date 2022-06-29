@@ -1,6 +1,7 @@
 """Module to store all components to use in tanjun"""
 
 import typing as _typing
+from .clash_of_clans import *
 from .pubchem import *
 from .subsplease import *
 
