@@ -6,6 +6,3 @@ BOT_TOKEN_TEST=""
 
 # Password set in postgres for role 'ritsu'
 SQL_DB_PASSWORD=""
-
-# API Token for Clash of Clans API
-COC_API_TOKEN=""

@@ -8,6 +8,7 @@ import hikari
 
 from ritsu.utils.common import days_of_week
 
+
 async def fetch_schedule(
     session: alluka.Injected[aiohttp.ClientSession]
 ) -> ItemsView | tuple[str, tuple[int, Any]]:
