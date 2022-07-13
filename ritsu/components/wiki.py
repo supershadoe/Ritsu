@@ -38,9 +38,7 @@ async def cmd_wikipedia(
         component=action_row
     )
 
-    await injector.call_with_async_di(
-        handle_inters, ctx, links, msg.id, action_row, bot
-    )
+    await handle_inters(ctx, links, msg.id, action_row, bot)
 
 
 loader_wiki: tanjun.abc.ClientLoader = (

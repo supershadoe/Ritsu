@@ -10,7 +10,7 @@ hooks = tanjun.SlashHooks()
 
 async def handle_inters(
     ctx: tanjun.abc.SlashContext,
-    links: tuple[list[str]],
+    links: list[str],
     msg_id: hikari.Snowflake,
     action_row: hikari.api.ActionRowBuilder,
     bot: hikari.GatewayBot

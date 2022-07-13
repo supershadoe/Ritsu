@@ -9,7 +9,7 @@ import yarl
 async def fetch_article(
     search_term: str,
     session: alluka.Injected[aiohttp.ClientSession]
-) -> tuple[list, list]:
+) -> tuple[list[str], list[str]]:
     request_url: yarl.URL = (
         yarl.URL("https://en.wikipedia.org/w/api.php")
         .with_query(action="opensearch", search=search_term, limit=5)
