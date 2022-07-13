@@ -49,7 +49,7 @@ async def send_initial_resp(
     search_term: str,
     bot: alluka.Injected[hikari.GatewayBot],
     injector: alluka.Injected[alluka.Client],
-    fandom_name: str = None
+    fandom_name: str = "en"
 ) -> None:
     """To send a message with search results from MediaWiki"""
 
@@ -57,24 +57,27 @@ async def send_initial_resp(
         fetch_article,
         search_term,
         ctx.command.name,
-        "en" if fandom_name is None else fandom_name
+        fandom_name
     )
-    action_row: hikari.api.ActionRowBuilder = bot.rest.build_action_row()
-    select_menu: hikari.api.SelectMenuBuilder = (
-        action_row.add_select_menu("wiki-search")
-        .set_min_values(1)
-        .set_placeholder("Select another article")
-    )
-    for index, title in enumerate(titles):
-        select_menu.add_option(title, f"{index}").add_to_menu()
-    select_menu.add_to_container()
+    action_row = None
+    if len(titles) - 1:
+        action_row: hikari.api.ActionRowBuilder = bot.rest.build_action_row()
+        select_menu: hikari.api.SelectMenuBuilder = (
+            action_row.add_select_menu("wiki-search")
+            .set_min_values(1)
+            .set_placeholder("Select another article")
+        )
+        for index, title in enumerate(titles):
+            select_menu.add_option(title, f"{index}").add_to_menu()
+        select_menu.add_to_container()
 
     msg = await ctx.respond(
         (
             "Here's the search result for the requested term.\n"
-            f"Direct link: _[Click here]({links[0]})_"
+            f"Direct link: [Click here]({links[0]})"
         ),
         component=action_row
     )
 
-    await handle_inters(ctx, links, msg.id, action_row, bot)
+    if action_row is not None:
+        await handle_inters(ctx, links, msg.id, action_row, bot)
