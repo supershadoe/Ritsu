@@ -28,8 +28,8 @@ async def handle_inters(
             await event.interaction.create_initial_response(
                 hikari.ResponseType.MESSAGE_UPDATE,
                 (
-                    "Here's the search result for the requested term."
-                    f"[​]({links[i]})"
+                    "Here's the search result for the requested term.\n"
+                    f"Direct link: _[Click here]({links[i]})_"
                 )
             )
     try:

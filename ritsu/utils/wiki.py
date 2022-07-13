@@ -70,7 +70,10 @@ async def send_initial_resp(
     select_menu.add_to_container()
 
     msg = await ctx.respond(
-        f"Here's the search result for the requested term.[​]({links[0]})",
+        (
+            "Here's the search result for the requested term.\n"
+            f"Direct link: _[Click here]({links[0]})_"
+        ),
         component=action_row
     )
 
