@@ -2,16 +2,29 @@
 
 import alluka
 import aiohttp
+import hikari
 import tanjun
 import yarl
+
+from ritsu.handlers.wiki import handle_inters
+
+
+api_links: dict[str, str] = {
+    "wikipedia": "https://{}.wikipedia.org/w/api.php",
+    "fandom": "https://{}.fandom.com/api.php"
+}
 
 
 async def fetch_article(
     search_term: str,
+    command: str,
+    subdomain: str,
     session: alluka.Injected[aiohttp.ClientSession]
 ) -> tuple[list[str], list[str]]:
+    """To fetch an article using the MediaWiki API"""
+
     request_url: yarl.URL = (
-        yarl.URL("https://en.wikipedia.org/w/api.php")
+        yarl.URL(api_links[command].format(subdomain))
         .with_query(action="opensearch", search=search_term, limit=5)
     )
     async with session.get(request_url) as req:
@@ -29,3 +42,36 @@ async def fetch_article(
             f"HTTP Status: {req.status}\n"
             f"Provided reason: ```json\n{req.reason}```"
         )
+
+
+async def send_initial_resp(
+    ctx: tanjun.abc.SlashContext,
+    search_term: str,
+    bot: alluka.Injected[hikari.GatewayBot],
+    injector: alluka.Injected[alluka.Client],
+    fandom_name: str = None
+) -> None:
+    """To send a message with search results from MediaWiki"""
+
+    titles, links = await injector.call_with_async_di(
+        fetch_article,
+        search_term,
+        ctx.command.name,
+        "en" if fandom_name is None else fandom_name
+    )
+    action_row: hikari.api.ActionRowBuilder = bot.rest.build_action_row()
+    select_menu: hikari.api.SelectMenuBuilder = (
+        action_row.add_select_menu("wiki-search")
+        .set_min_values(1)
+        .set_placeholder("Select another article")
+    )
+    for index, title in enumerate(titles):
+        select_menu.add_option(title, f"{index}").add_to_menu()
+    select_menu.add_to_container()
+
+    msg = await ctx.respond(
+        f"Here's the search result for the requested term.[​]({links[0]})",
+        component=action_row
+    )
+
+    await handle_inters(ctx, links, msg.id, action_row, bot)
