@@ -9,6 +9,7 @@ import tanjun
 
 import ritsu.dependencies as deps
 from ritsu.dependency import DependencyProto
+from ritsu.handlers.common import ComponentInteractionHandler
 
 if os.name != "nt":
     import uvloop
@@ -33,25 +34,23 @@ async def tasks_shutdown(client: alluka.Injected[tanjun.Client]) -> None:
         await client.injector.call_with_async_di(dependency.unloader)
 
 
-def start_bot() -> tuple[hikari.GatewayBot, hikari.Activity]:
+def start_bot() -> tuple[hikari.RESTBot, tanjun.Client]:
     """Function to start discord bot"""
 
     if "uvloop" in dir():
         uvloop.install()
 
-    bot: hikari.GatewayBot = hikari.GatewayBot(
-        os.getenv("BOT_TOKEN_TEST") or os.getenv("BOT_TOKEN_PROD")
+    bot: hikari.RESTBot = hikari.RESTBot(
+        os.getenv("BOT_TOKEN_TEST") or os.getenv("BOT_TOKEN_PROD"),
+        hikari.TokenType.BOT
     )
 
-    (
-        tanjun.Client.from_gateway_bot(bot, declare_global_commands=True)
+    client: tanjun.Client = (
+        tanjun.Client.from_rest_bot(bot, declare_global_commands=True)
         .add_client_callback(tanjun.ClientCallbackNames.STARTING, tasks_startup)
         .add_client_callback(tanjun.ClientCallbackNames.CLOSING, tasks_shutdown)
         .load_modules("ritsu.components")
     )
+    bot.set_listener(hikari.ComponentInteraction, ComponentInteractionHandler())
 
-    activity: hikari.Activity = hikari.Activity(
-        name="commands", type=hikari.ActivityType.LISTENING
-    )
-
-    return bot, activity
+    return bot, client

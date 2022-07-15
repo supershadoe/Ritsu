@@ -41,7 +41,7 @@ def gen_schedule_embed(schedule: ItemsView, day_of_week: str) -> hikari.Embed:
 
 
 def gen_action_row(
-    bot: alluka.Injected[hikari.GatewayBot]
+    bot: alluka.Injected[hikari.RESTAware]
 ) -> hikari.api.ActionRowBuilder:
     """To generate a cached ActionRowBuilder to reuse for other commands"""
 

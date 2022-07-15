@@ -1,10 +1,11 @@
 aiohttp ~= 3.8.1
-alluka ~= 0.1.1
-asyncpg ~= 0.25.0
+alluka ~= 0.1.2
+asyncpg ~= 0.26.0
 beautifulsoup4 ~= 4.11.1
-hikari ~= 2.0.0.dev109
-hikari-tanjun ~= 2.5.2a1
+# hikari ~= 2.0.0.dev109
+git+https://github.com/davfsa/hikari@task/new-lifetime-test
+hikari-tanjun ~= 2.5.3a1
 js2py ~= 0.71
-typing_extensions ~= 4.2.0
+typing_extensions ~= 4.3.0
 uvloop ~= 0.16.0; os_name != 'nt'
 yarl ~= 1.7.2

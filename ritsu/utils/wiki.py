@@ -47,7 +47,7 @@ async def fetch_article(
 async def send_initial_resp(
     ctx: tanjun.abc.SlashContext,
     search_term: str,
-    bot: alluka.Injected[hikari.GatewayBot],
+    bot: alluka.Injected[hikari.RESTAware],
     injector: alluka.Injected[alluka.Client],
     fandom_name: str = "en"
 ) -> None:
@@ -59,7 +59,8 @@ async def send_initial_resp(
         ctx.command.name,
         fandom_name
     )
-    action_row = None
+    _actionRowT = hikari.api.ActionRowBuilder | hikari.UndefinedType
+    action_row: _actionRowT = hikari.UNDEFINED
     if len(titles) - 1:
         action_row: hikari.api.ActionRowBuilder = bot.rest.build_action_row()
         select_menu: hikari.api.SelectMenuBuilder = (

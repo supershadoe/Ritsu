@@ -15,7 +15,7 @@ hooks = tanjun.SlashHooks()
 @hooks.with_on_success
 async def handle_inters(
     ctx: tanjun.abc.SlashContext,
-    bot: alluka.Injected[hikari.GatewayBot],
+    bot: alluka.Injected[hikari.RESTAware],
     action_row: hikari.api.ActionRowBuilder = (
         tanjun.cached_inject(gen_action_row)
     )

@@ -63,7 +63,7 @@ def gen_compound_embed(details: dict[str, str | int]) -> hikari.Embed:
 
 
 def gen_action_row(
-    bot: alluka.Injected[hikari.GatewayBot]
+    bot: alluka.Injected[hikari.RESTBot]
 ) -> hikari.api.ActionRowBuilder:
     """To generate a tuple of action rows to be cached for later use"""
 
