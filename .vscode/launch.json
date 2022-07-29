@@ -2,11 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Start discord bot",
-            "type": "python",
+            "command": "npx wrangler dev",
+            "name": "Run wrangler dev",
             "request": "launch",
-            "module": "ritsu",
-            "justMyCode": true
+            "type": "node-terminal"
         }
     ]
 }

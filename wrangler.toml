@@ -1,0 +1,5 @@
+name = "ritsu"
+main = "src/index.ts"
+workers_dev = false
+compatibility_date = "2022-07-29"
+

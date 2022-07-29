@@ -1,0 +1,20 @@
+{
+  "name": "ritsu",
+  "version": "3.0.0",
+  "description": "A discord bot to fetch information from various API",
+  "type": "module",
+  "private": true,
+  "author": "supershadoe",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@cloudflare/workers-types": "~3.14.1",
+    "node-fetch": "~3.2.9",
+    "typescript": "~4.7.4",
+    "wrangler": "~2.0.22"
+  },
+  "scripts": {
+    "start": "wrangler dev",
+    "deploy": "wrangler publish",
+    "register_cmds": "node src/register_cmds.js"
+  }
+}
