@@ -1,8 +1,0 @@
-# Bot token that can be used for use in production
-BOT_TOKEN_PROD=""
-
-# Bot token that can be used for use while debugging/testing
-BOT_TOKEN_TEST=""
-
-# Password set in postgres for role 'ritsu'
-SQL_DB_PASSWORD=""
