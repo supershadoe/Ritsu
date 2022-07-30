@@ -1,6 +1,22 @@
 `use strict`;
+/* Adopted from https://gist.github.com/devsnek/77275f6e3f810a9545440931ed314dc1 */
 
-const VERIFY_ALGO = "NODE_ED25519";
+const VERIFY_ALGO = "NODE-ED25519";
+
+/**
+ * To convert a string which has raw bytes encoded as hexadecimal numbers
+ * into an Uint8Array.
+ * 
+ * @param hex The bytes in hex provided as a string
+ * @returns Uint8Array
+ */
+function hex2bin(hex: string): Uint8Array {
+    return new Uint8Array(
+        hex.match(/[A-Za-z0-9]{2}/g)?.map(
+            (byte) => parseInt(byte, 16)
+        ) ?? []
+    );
+}
 
 /**
  * Creates an instance of CryptoKey using SubtleCrypto module exposed by
@@ -12,14 +28,9 @@ const VERIFY_ALGO = "NODE_ED25519";
  * @returns A promise for the CryptoKey instance created from the public key.
  */
 export async function importPubKey(pubKey: string): Promise<CryptoKey> {
-    /*
-     * public: true not required in algorithm definition
-     * as cf workers don't allow private key imports
-     */
-    const encoder = new TextEncoder();
     return await crypto.subtle.importKey(
         "raw",
-        encoder.encode(pubKey).buffer,
+        hex2bin(pubKey),
         {
             name: VERIFY_ALGO,
             namedCurve: VERIFY_ALGO
@@ -45,18 +56,15 @@ export async function importPubKey(pubKey: string): Promise<CryptoKey> {
 export async function verify(
     key: CryptoKey, request: Request
 ): Promise<Response> {
-    /*  */
-    const encoder = new TextEncoder();
     const signature = request.headers.get("X-Signature-ED25519");
     const timestamp = request.headers.get("X-Signature-Timestamp");
     const body = await request.text();
     if (signature && timestamp) {
-        const buf_signature = encoder.encode(signature).buffer;
         const isVerified = await crypto.subtle.verify(
             VERIFY_ALGO,
             key,
-            buf_signature,
-            encoder.encode(timestamp + body)
+            hex2bin(signature),
+            (new TextEncoder()).encode(timestamp + body)
         );
         if (!isVerified) {
             return new Response(
@@ -64,15 +72,12 @@ export async function verify(
             );
         } else {
             try {
-                const json = JSON.parse(body)
+                const json = JSON.parse(body);
                 return handleInteractions(json);
             }
             catch (e) {
                 if (!(e instanceof SyntaxError)) { throw e; }
-                return new Response(
-                    "Malformed JSON body",
-                    { status: 400 }
-                )
+                return new Response("Malformed JSON body", { status: 400 });
             }
         }
     }
@@ -112,5 +117,5 @@ async function handleInteractions(interactionBody: any): Promise<Response> {
     if (interactionBody.type === 1) {
         return jsonResponse({type: 1});
     }
-    return new Response("Handling not implemented yet", { status: 501 })
+    return new Response("Handling not implemented yet", { status: 501 });
 }
