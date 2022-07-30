@@ -5,5 +5,5 @@
  * (like env vars, KV bindings, etc.)
  */
 export interface Env {
-    RITSU_APP_PUB_KEY: BigInt;
+    RITSU_APP_PUB_KEY: string;
 }
