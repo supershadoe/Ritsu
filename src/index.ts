@@ -14,7 +14,7 @@ export default {
                 "👋 This is supposed to be accessed using discord"
             );
         }
-        const pubKey = await importPubKey(env.DISCORD_PUB_KEY)
+        const pubKey = await importPubKey(env.RITSU_APP_PUB_KEY)
         return verify(pubKey, request)
     },
 };

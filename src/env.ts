@@ -5,8 +5,5 @@
  * (like env vars, KV bindings, etc.)
  */
 export interface Env {
-    DISCORD_APP_ID: BigInt;
-    DISCORD_PUB_KEY: string;
-    DISCORD_TEST_GUILD_ID: BigInt;
-    DISCORD_TOKEN: string;
+    RITSU_APP_PUB_KEY: BigInt;
 }
