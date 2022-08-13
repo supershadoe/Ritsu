@@ -1,6 +1,7 @@
 `use strict`;
 /* Adopted from https://gist.github.com/devsnek/77275f6e3f810a9545440931ed314dc1 */
 
+import { Env } from ".";
 
 const VERIFY_ALGO = "NODE-ED25519";
 
@@ -68,4 +69,47 @@ export function verify(
         hex2bin(signature),
         (new TextEncoder()).encode(timestamp + body)
     );
+}
+
+/**
+ * Middleware to check for existence of signature and timestamp in a payload
+ * that was received.
+ * 
+ * @param request The request that was received.
+ * @param _args The env and ctx that was passed by Cloudflare.
+ * @returns A response if the request is invalid.
+ */
+export async function checkForSigAndTS(
+    request: Request, ..._args: [Env, ExecutionContext]
+): Promise<Response | undefined> {
+    const signature = request.headers.get("X-Signature-ED25519");
+    const timestamp = request.headers.get("X-Signature-Timestamp");
+    if( ! ( signature && timestamp) ) {
+        return new Response(
+            "Missing signature and timestamp for verification",
+            { status: 401 }
+        );
+    }
+}
+
+/**
+ * Middleware to verify the signature of an interaction sent by Discord.
+ * 
+ * @param request The request that was received.
+ * @param env Cloudflare secrets added via wranger/dashboard.
+ * @param _ The unused ExecutionContext obj sent by Cloudflare.
+ * @returns A response if the request is invalid.
+ */
+export async function verifySig(
+    request: Request, env: Env, _: ExecutionContext
+): Promise<Response | undefined> {
+    const pubKey = await importPubKey(env.RITSU_APP_PUB_KEY);
+    const signature = <string> request.headers.get("X-Signature-ED25519");
+    const timestamp = <string> request.headers.get("X-Signature-Timestamp");
+    const body = await request.clone().text();
+    if (! await verify(pubKey, signature, timestamp, body) ) {
+        return new Response(
+            "Received a request with invalid signature", { status: 401 }
+        );
+    }
 }

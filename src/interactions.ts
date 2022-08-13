@@ -1,4 +1,5 @@
 import { InteractionType } from "discord-api-types/v10"
+import { Env } from ".";
 
 /**
  * Creates a Response object from JSON objects.
@@ -23,11 +24,15 @@ function jsonResponse(
 /**
  * Main interaction handler function
  * 
- * @param interactionBody The body of request sent by Discord.
+ * @param request The request that was received from Discord.
+ * @param _args The env and ctx for this request.
  * @returns A promise for the response which is to be sent.
  */
-export async function handleInteractions(interactionBody: any): Promise<Response> {
-    if (interactionBody.type === InteractionType.Ping) {
+export async function handleInteractions(
+    request: Request, ..._args: [Env, ExecutionContext]
+): Promise<Response> {
+    const body: any = await request.json();
+    if (body.type === InteractionType.Ping) {
         return jsonResponse({type: 1});
     }
     return new Response("Handling not implemented yet", { status: 501 });
