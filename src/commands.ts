@@ -1,7 +1,7 @@
 `use strict`;
 
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord-api-types/v10";
-import { DAYS_OF_WEEK } from "./consts";
+import { DAYS_OF_WEEK } from "./utils";
 
 const GuildOnlySlashCommand = {
     dm_permission: false,

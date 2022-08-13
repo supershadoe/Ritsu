@@ -1,25 +1,6 @@
 import { InteractionType } from "discord-api-types/v10"
 import { Env } from ".";
-
-/**
- * Creates a Response object from JSON objects.
- *
- * Made just for convenience.
- *
- * @param responseBody The response object to stringify.
- * @param options Custom settings like headers/status code.
- * @returns A new response object generated with the required defaults.
- */
-function jsonResponse(
-    responseBody: object,
-    options: object = {
-        headers: {
-            "Content-Type": "application/json;charset=UTF-8"
-        }
-    }
-): Response {
-    return new Response(JSON.stringify(responseBody), options);
-}
+import { jsonResponse } from "./utils"
 
 /**
  * Main interaction handler function

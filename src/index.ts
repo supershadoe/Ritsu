@@ -1,6 +1,7 @@
 `use strict`;
 
 import { Router } from "itty-router";
+import { syncCommands } from "./commandSync"
 import { handleInteractions } from "./interactions";
 import { checkForSigAndTS, verifySig } from "./verifyInter";
 
@@ -9,7 +10,9 @@ import { checkForSigAndTS, verifySig } from "./verifyInter";
  * (like env vars, KV bindings, etc.)
  */
  export interface Env {
+    RITSU_APP_ID: string;
     RITSU_APP_PUB_KEY: string;
+    RITSU_CLIENT_SECRET: string;
 }
 
 const router = Router();
@@ -25,15 +28,7 @@ router
         */
         "Not something that I was designed to do", { status: 400 }
     ))
-    .post("/generate-admin-token", () => new Response("test")) // TODO
-    .post("/sync-cmds", (request: Request, env: Env, _: ExecutionContext) => {
-        const auth = request.headers.get("Authentication"); // TODO
-        return new Response(
-            `Processing request to sync commands.
-            Try not to run this endpoint multiple times to not get ratelimited.`,
-            { status: 200 }
-        );
-    })
+    .post("/sync-cmds", syncCommands)
     .post("*", checkForSigAndTS, verifySig, handleInteractions)
     ;
 
