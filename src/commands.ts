@@ -15,7 +15,7 @@ export const PUBCHEM = {
     description: "Fetch the details of a compound from PubChem",
     options: [
         {
-            name: "Compound Name",
+            name: "compound_name",
             description:
               "The name of the compound " +
               "/ Try to use IUPAC Name for accurate result",
@@ -32,13 +32,13 @@ export const FANDOM = {
     description: "Search for any article from any fandom",
     options: [
         {
-            name: "Search Term",
+            name: "search_term",
             description: "Term to search for",
             type: ApplicationCommandOptionType.String,
             required: true
         },
         {
-            name: "Fandom Name",
+            name: "fandom_name",
             description: "Fandom site to search in",
             type: ApplicationCommandOptionType.String,
             required: true
@@ -53,7 +53,7 @@ export const WIKIPEDIA = {
     description: "Search for any article from wikipedia",
     options: [
         {
-            name: "Search Term",
+            name: "search_term",
             description: "Term to search for",
             type: ApplicationCommandOptionType.String,
             required: true
@@ -73,13 +73,14 @@ export const SUBSPLEASE = {
             type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
-                    name: "Day of week",
+                    name: "day_of_week",
                     description: "Day of week to fetch schedule for",
-                    choices: DAYS_OF_WEEK,
-                    default: DAYS_OF_WEEK[(new Date()).getDay()],
+                    type: ApplicationCommandOptionType.String,
+                    choices: DAYS_OF_WEEK.map((d) => ({ name: d, value: d })),
                     required: false
                 }
             ]
         }
     ]
 }
+// TODO default: DAYS_OF_WEEK[(new Date()).getDay()],
