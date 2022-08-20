@@ -1,71 +1,99 @@
+import { RouteBases, Routes } from "discord-api-types/v10";
 import { Env } from ".";
 import * as commands from "./commands";
-import { jsonResponse } from "./utils";
+import { jsonHeaders, jsonResponse } from "./utils";
 
+/**
+ * The structure of a client credential access token response sent by Discord
+ * if the request is successful.
+ */
 interface ClientCredAccessTokenResp {
     access_token: string;
     token_type: string;
     expires_in: number;
     scope: string;
-}
+};
 
-class RegisteringError extends Error {}
+/**
+ * Fetches a bearer token with applications.commands.update scope using client
+ * credential grant OAuth2 to update all commands.
+ * 
+ * @param env Cloudflare secrets added via wranger/dashboard.
+ * @returns Awaits for the commands to finish registering to send a final resp.
+ */
+async function obtainBearerToken(env: Env): Promise<Response> {
 
-async function registerCommands(app_id: string, access_token: string) {
-    //TODO jsdoc + func for global and guild commands
-    //Also first fetch commands and then update (ref 1.1.1.1 bot)
-    const commandsURL =
-        `https://discord.com/api/v10/applications/${app_id}/commands`;
-    const response = await fetch(commandsURL, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${access_token}`
-        },
-        method: "PUT",
-        body: JSON.stringify(Object.values(commands))
-    });
-    const text = await response.text();
-    if (response.ok) {
-        console.log("Registered all commands!");
-    } else {
-        console.log(`Error while registering commands for ${commandsURL}`)
-        throw new RegisteringError(text)
-    }
-    return {}
-}
-
-export async function syncCommands(
-    _req: Request, env: Env, _ctx: ExecutionContext
-) {
-
-    /** Base64-encoded credentials for HTTP Basic Authentication */
     const app_id = env.RITSU_APP_ID;
-    const client_creds = btoa(`${app_id}:${env.RITSU_CLIENT_SECRET}`);
+    const urlencoded_data = new URLSearchParams({
+        client_id: app_id,
+        client_secret: env.RITSU_CLIENT_SECRET,
+        grant_type: "client_credentials",
+        scope: "applications.commands.update"
+    });
+    const tokenURL = RouteBases.api + Routes.oauth2TokenExchange();
 
-    /** {"grant_type":"client_credentials","scope":"identify"} */
-    const urlencoded_data = (
-        "%7B%22grant_type%22%3A%22client_credentials%22%2C"
-        + "%22scope%22%3A%22identify%22%7D"
-    );
-
-    return await fetch(new Request("https://discord.com/api/v10/oauth2/token"),
+    return fetch(new Request(tokenURL),
         {
             method: "POST",
-            headers: {
-                "Authentication": `Basic ${client_creds}`,
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: urlencoded_data
         }
-    ).then((response: Response) => {
-        if (!response.ok) {
-            return new Response(
-                `Failed to get an OAuth2 Bearer token from Discord to sync commands. (${response.status})`,
-                { status: 401 }
-            )
-        }
-    })?.then(async (response?: Response) => {
-        const body = <ClientCredAccessTokenResp> await response?.json()
-        return jsonResponse(await registerCommands(app_id, body.access_token))
-    })
+    ).then(async (response: Response) => {
+        if (!response.ok)
+            return jsonResponse(
+                {
+                    "ritsu_error": "Failed to get an OAuth2 Bearer token from Discord to sync commands.",
+                    "discord_status_code": response.status,
+                    "discord_status_text": response.statusText,
+                    "discord_error_body": await response.json()
+                },
+                { headers: jsonHeaders, status: 500 }
+            );
+        const body = <ClientCredAccessTokenResp> await response?.json();
+        return await registerGlobalCommands(app_id, body.access_token);
+    });
+}
+
+/**
+ * The piece of code which actually registers all global commands.
+ * 
+ * @param app_id The application ID/Client ID.
+ * @param access_token The access token obtained from OAuth2.
+ * @returns A response to indicate success/failure.
+ */
+async function registerGlobalCommands(
+    app_id: string, access_token: string
+): Promise<Response> {
+    const commandsURL = RouteBases.api + Routes.applicationCommands(app_id);
+    const response = await fetch(commandsURL, {
+        method: "PUT",
+        headers: { ...jsonHeaders, Authorization: `Bearer ${access_token}` },
+        body: JSON.stringify(Object.values(commands))
+    });
+    if (response.ok)
+        return new Response("Registered all global commands!");
+    else
+        return jsonResponse(
+            {
+                "ritsu_error": "Failed to register all global commands :(",
+                "discord_status_code": response.status,
+                "discord_status_text": response.statusText,
+                "discord_error_body": await response.json()
+            },
+            { headers: jsonHeaders, status: 500 }
+        );
+}
+
+/**
+ * Callback that gets executed on receiving a request at "/sync-cmds".
+ * 
+ * @param _req Useless request object.
+ * @param env Cloudflare secrets added via wranger/dashboard.
+ * @param _ctx The unused ExecutionContext obj sent by Cloudflare.
+ * @returns A response as a result of all the functions that run.
+ */
+export async function syncCommands(
+    _req: Request, env: Env, _ctx: ExecutionContext
+): Promise<Response> {
+    return await obtainBearerToken(env);
 }

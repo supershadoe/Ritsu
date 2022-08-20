@@ -1,9 +1,12 @@
-/**
- * Days of week for using in some commands.
- */
+/** Days of week for using in some commands. */
 export const DAYS_OF_WEEK = [
     "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 ]
+
+/** Content-Type header for response with JSON body. */
+export const jsonHeaders = {
+    "Content-Type": "application/json;charset=UTF-8"
+}
 
 /**
  * Creates a Response object from JSON objects.
@@ -14,14 +17,6 @@ export const DAYS_OF_WEEK = [
  * @param options Custom settings like headers/status code.
  * @returns A new response object generated with the required defaults.
  */
-export function jsonResponse(
-    responseBody: object,
-    options: object = {
-        headers: {
-            "Content-Type": "application/json;charset=UTF-8"
-        }
-    },
-    jsonType: boolean = true //TODO
-): Response {
-    return new Response(JSON.stringify(responseBody), options);
-}
+export const jsonResponse = (
+    responseBody: object, options: object = { headers: jsonHeaders }
+): Response => new Response(JSON.stringify(responseBody), options);
