@@ -17,9 +17,11 @@ import { checkForSigAndTS, verifySig } from "./verifyInter";
 
 const router = Router();
 router
+    .get("/sync-cmds", syncCommands)
     .get("*", (..._args) => new Response(
         "This API is supposed to be accessed using discord", { status: 400 }
     ))
+    .post("*", checkForSigAndTS, verifySig, handleInteractions)
     .all("*", (..._args) => new Response(
         /*
         * 501 imo means more like a proper request but I haven't implemented it
@@ -28,8 +30,6 @@ router
         */
         "Not something that I was designed to do", { status: 400 }
     ))
-    .post("/sync-cmds", syncCommands)
-    .post("*", checkForSigAndTS, verifySig, handleInteractions)
     ;
 
 export default { fetch: router.handle };
