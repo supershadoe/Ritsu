@@ -15,13 +15,28 @@ interface ClientCredAccessTokenResp {
 };
 
 /**
+ * Callback that gets executed on receiving a request at "/sync-cmds".
+ *
  * Fetches a bearer token with applications.commands.update scope using client
  * credential grant OAuth2 to update all commands.
- * 
+ *  
+ * @param _req Useless request object.
  * @param env Cloudflare secrets and KV added via wranger/dashboard.
- * @returns Awaits for the commands to finish registering to send a final resp.
+ * @param _ctx The unused ExecutionContext obj sent by Cloudflare.
+ * @returns A response as a result of all the functions that run.
  */
-async function obtainBearerToken(env: Env): Promise<Response> {
+export async function syncCommands(
+    _req: Request, env: Env, _ctx: ExecutionContext
+): Promise<Response> {
+
+    if (! env.TRUSTED_LOCAL_ENV)
+        return new Response(
+            "This API is supposed to be accessed using discord", { status: 400 }
+        );
+    if (! (env.RITSU_APP_ID && env.RITSU_CLIENT_SECRET))
+        return new Response(
+            "Bruh, add app id and client secrets", { status: 500 }
+        );
 
     const app_id = env.RITSU_APP_ID;
     const urlencoded_data = new URLSearchParams({
@@ -82,18 +97,4 @@ async function registerGlobalCommands(
             },
             { headers: jsonHeaders, status: 500 }
         );
-}
-
-/**
- * Callback that gets executed on receiving a request at "/sync-cmds".
- * 
- * @param _req Useless request object.
- * @param env Cloudflare secrets and KV added via wranger/dashboard.
- * @param _ctx The unused ExecutionContext obj sent by Cloudflare.
- * @returns A response as a result of all the functions that run.
- */
-export async function syncCommands(
-    _req: Request, env: Env, _ctx: ExecutionContext
-): Promise<Response> {
-    return await obtainBearerToken(env);
 }
