@@ -32,26 +32,26 @@ async function obtainBearerToken(env: Env): Promise<Response> {
     });
     const tokenURL = RouteBases.api + Routes.oauth2TokenExchange();
 
-    return fetch(new Request(tokenURL),
-        {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: urlencoded_data
-        }
-    ).then(async (response: Response) => {
-        if (!response.ok)
-            return jsonResponse(
-                {
-                    "ritsu_error": "Failed to get an OAuth2 Bearer token from Discord to sync commands.",
-                    "discord_status_code": response.status,
-                    "discord_status_text": response.statusText,
-                    "discord_error_body": await response.json()
-                },
-                { headers: jsonHeaders, status: 500 }
-            );
-        const body = <ClientCredAccessTokenResp> await response?.json();
-        return await registerGlobalCommands(app_id, body.access_token);
+    const request = new Request(tokenURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: urlencoded_data
     });
+    const response = await fetch(request);
+    if ( ! response.ok )
+        return jsonResponse(
+            {
+                "ritsu_error":
+                    "Failed to get an OAuth2 Bearer token from Discord to sync"
+                    + " commands.",
+                "discord_status_code": response.status,
+                "discord_status_text": response.statusText,
+                "discord_error_body": await response.json()
+            },
+            { headers: jsonHeaders, status: 500 }
+        );
+    const body = <ClientCredAccessTokenResp> await response.json();
+    return await registerGlobalCommands(app_id, body.access_token);
 }
 
 /**
