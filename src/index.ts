@@ -10,9 +10,11 @@ import { checkForSigAndTS, verifySig } from "./verifyInter";
  * (like env vars, KV bindings, etc.)
  */
  export interface Env {
-    RITSU_APP_ID: string;
     RITSU_APP_PUB_KEY: string;
-    RITSU_CLIENT_SECRET: string;
+
+    TRUSTED_LOCAL_ENV: boolean | undefined;
+    RITSU_APP_ID: string | undefined;
+    RITSU_CLIENT_SECRET: string | undefined;
 }
 
 const router = Router();

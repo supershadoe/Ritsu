@@ -1,19 +1,9 @@
-# Removing pycache and venv
-venv
-__pycache__
-**/__pycache__/*
-*.pyc
-
 # Ignoring all vscode files except run config
 .vscode/*
 !.vscode/launch.json
 
-# Ignoring all Pycharm files except runConfiguration
-.idea/*
-!.idea/runConfigurations/*
-
-# Ignore .deploy
-.deploy
-
 # Ignore node_modules
 node_modules
+
+# Ignore local env vars that apply only to `wrangler dev`
+.dev.vars
