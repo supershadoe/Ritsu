@@ -18,7 +18,7 @@ interface ClientCredAccessTokenResp {
  * Fetches a bearer token with applications.commands.update scope using client
  * credential grant OAuth2 to update all commands.
  * 
- * @param env Cloudflare secrets added via wranger/dashboard.
+ * @param env Cloudflare secrets and KV added via wranger/dashboard.
  * @returns Awaits for the commands to finish registering to send a final resp.
  */
 async function obtainBearerToken(env: Env): Promise<Response> {
@@ -88,7 +88,7 @@ async function registerGlobalCommands(
  * Callback that gets executed on receiving a request at "/sync-cmds".
  * 
  * @param _req Useless request object.
- * @param env Cloudflare secrets added via wranger/dashboard.
+ * @param env Cloudflare secrets and KV added via wranger/dashboard.
  * @param _ctx The unused ExecutionContext obj sent by Cloudflare.
  * @returns A response as a result of all the functions that run.
  */

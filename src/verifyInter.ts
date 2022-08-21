@@ -96,7 +96,7 @@ export async function checkForSigAndTS(
  * Middleware to verify the signature of an interaction sent by Discord.
  * 
  * @param request The request that was received.
- * @param env Cloudflare secrets added via wranger/dashboard.
+ * @param env Cloudflare secrets and KV added via wranger/dashboard.
  * @param _ The unused ExecutionContext obj sent by Cloudflare.
  * @returns A response if the request is invalid.
  */
