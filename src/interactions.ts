@@ -13,8 +13,15 @@ export async function handleInteractions(
     request: Request, ..._args: [Env, ExecutionContext]
 ): Promise<Response> {
     const body: any = await request.json();
-    if (body.type === InteractionType.Ping) {
-        return jsonResponse({type: 1});
+    switch(body.type){
+        case InteractionType.Ping: 
+            return jsonResponse({type: 1});
+        case InteractionType.ApplicationCommand:
+            break
+        case InteractionType.MessageComponent:
+            break
+        case InteractionType.ModalSubmit:
+            break
     }
     return new Response("Handling not implemented yet", { status: 501 });
 }
