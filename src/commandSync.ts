@@ -65,7 +65,7 @@ export async function syncCommands(
             },
             { headers: jsonHeaders, status: 500 }
         );
-    const body = <ClientCredAccessTokenResp> await response.json();
+    const body: ClientCredAccessTokenResp = await response.json();
     return await registerGlobalCommands(app_id, body.access_token);
 }
 

@@ -1,4 +1,4 @@
-import { InteractionType } from "discord-api-types/v10"
+import { APIInteraction, InteractionType } from "discord-api-types/v10"
 import { Env } from ".";
 import { jsonResponse } from "./utils"
 
@@ -12,7 +12,7 @@ import { jsonResponse } from "./utils"
 export async function handleInteractions(
     request: Request, ..._args: [Env, ExecutionContext]
 ): Promise<Response> {
-    const body: any = await request.json();
+    const body: APIInteraction = await request.json();
     switch(body.type){
         case InteractionType.Ping: 
             return jsonResponse({type: 1});
