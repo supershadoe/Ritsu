@@ -10,7 +10,6 @@ const GuildOnlySlashCommand = {
 
 export const PUBCHEM = {
     ...GuildOnlySlashCommand,
-    id: "985455808697466900",
     name: "pubchem",
     description: "Fetch the details of a compound from PubChem",
     options: [
@@ -27,7 +26,6 @@ export const PUBCHEM = {
 
 export const FANDOM = {
     ...GuildOnlySlashCommand,
-    id: "996816322556071976",
     name: "fandom",
     description: "Search for any article from any fandom",
     options: [
@@ -48,7 +46,6 @@ export const FANDOM = {
 
 export const WIKIPEDIA = {
     ...GuildOnlySlashCommand,
-    id: "996805455798087720",
     name: "wikipedia",
     description: "Search for any article from wikipedia",
     options: [
@@ -63,7 +60,6 @@ export const WIKIPEDIA = {
 
 export const SUBSPLEASE = {
     ...GuildOnlySlashCommand,
-    id: "985089699599241254",
     name: "subsplease",
     description: "Commands to access Subsplease API",
     options: [
@@ -84,3 +80,4 @@ export const SUBSPLEASE = {
     ]
 }
 // TODO default: DAYS_OF_WEEK[(new Date()).getDay()],
+// TODO create a KV Namespace with all command ids for both testing and stable bot.
