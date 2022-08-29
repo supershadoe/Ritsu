@@ -11,9 +11,9 @@ import { checkForSigAndTS, verifySig } from "./verifyInter";
  */
  export interface Env {
     RITSU_APP_PUB_KEY: string;
+    RITSU_APP_ID: string;
 
     TRUSTED_LOCAL_ENV: boolean | undefined;
-    RITSU_APP_ID: string | undefined;
     RITSU_CLIENT_SECRET: string | undefined;
 }
 
