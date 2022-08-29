@@ -1,5 +1,5 @@
 import {
-    APIInteractionResponse, InteractionResponseType, RESTPatchAPIWebhookWithTokenMessageJSONBody, RouteBases, Routes
+    APIInteractionResponse, InteractionResponseType, MessageFlags, RESTPatchAPIWebhookWithTokenMessageJSONBody, RouteBases, Routes
 } from "discord-api-types/v10";
 
 /** Days of week for using in some commands. */
@@ -11,6 +11,11 @@ export const DAYS_OF_WEEK = [
 export const jsonHeaders = {
     "Content-Type": "application/json;charset=UTF-8"
 }
+
+/**
+ *  A helper generic to generate optional types
+ */
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 /**
  * Creates a Response object from JSON objects.
@@ -56,3 +61,17 @@ export const editInteractionResp = (
     // also some stuff are missing in resp check that
     // also it feels kinda slower idk
 );
+
+/**
+ * The default response sent for commands that don't have an implementation yet.
+ *
+ * @returns An ephemeral response object.
+ */
+ export const not_impl = (..._args: any[]): Response =>
+ jsonResponse(<APIInteractionResponse> {
+     type: InteractionResponseType.ChannelMessageWithSource,
+     data: {
+         content: "Will be implemented soon",
+         flags: MessageFlags.Ephemeral
+     }
+ });

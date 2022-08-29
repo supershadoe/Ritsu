@@ -1,9 +1,9 @@
 import {
-    APIActionRowComponent, APIButtonComponentWithCustomId, APIEmbed,
-    APISelectMenuComponent, APISelectMenuOption,
+    APIActionRowComponent, APIApplicationCommandInteractionDataStringOption, APIButtonComponentWithCustomId, APIChatInputApplicationCommandInteraction, APIEmbed, APISelectMenuComponent, APISelectMenuOption,
     ButtonStyle, ComponentType, RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
-import { editInteractionResp } from "../utils";
+import { Env } from "..";
+import { deferResponse, editInteractionResp } from "../utils";
 
 /** The basic URL of PubChem's site. */
 const pubchemURL = "https://pubchem.ncbi.nlm.nih.gov";
@@ -50,7 +50,9 @@ type pubchemComponents = (
     ]
 );
 
-/** Embed generator for sending in response
+/**
+ * Embed generator for sending in response.
+ *
  * @param propTable The property table returned by PubChem.
  * @param compound A future-proof param to generate embeds for
  * different compounds from the same propTable (switching between results of
@@ -86,6 +88,7 @@ function generateEmbeds(
 
 /**
  * Message component generator to attach components to the message thats sent.
+ *
  * @param propTable The propTable to generate the select menu from (to switch
  * between search results).
  * @returns An array of either a button alone or a button and a select menu.
@@ -126,13 +129,14 @@ function generateComponents(
 /**
  * The primary command handler for `pubchem` command which fetches results from
  * the API and responds to the interaction.
+ *
  * @param compoundName The name of the compound to search for.
  * @param appID The application ID of the bot.
  * @param ctx The execution context to use for caching.
  * @param interactionToken The token for the current interaction to edit the
  * deferred message.
  */
-export async function pubchem(
+async function fetchDataAndRespond(
     compoundName: string, appID: string, ctx: ExecutionContext,
     interactionToken: string
 ): Promise<Response> {
@@ -171,4 +175,26 @@ export async function pubchem(
     return await editInteractionResp(
         appID, interactionToken, interactionResponse
     );
+}
+
+/**
+ * Interaction handler for `/pubchem` command.
+ *
+ * @param interaction The interaction object sent by Discord.
+ * @param env The env at the time of execution.
+ * @param ctx The execution context.
+ * @returns A deferred response object to wait till data is fetched.
+ */
+
+export function pubchem(
+    interaction: APIChatInputApplicationCommandInteraction,
+    env: Env, ctx: ExecutionContext
+): Response {
+    // This option is declared as required so it definitely can't be undefined.
+    const compound_name = interaction.data.options![0] as
+        APIApplicationCommandInteractionDataStringOption;
+    ctx.waitUntil(fetchDataAndRespond(
+        compound_name.value, env.RITSU_APP_ID, ctx, interaction.token
+    ));
+    return deferResponse();
 }

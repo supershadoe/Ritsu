@@ -1,11 +1,20 @@
 import {
-    APIApplicationCommandInteractionDataStringOption, APIChatInputApplicationCommandInteraction,
-    APIInteraction, APIInteractionResponse, InteractionResponseType,
-    InteractionType, MessageFlags
+    APIChatInputApplicationCommandInteraction, APIInteraction,
+    ApplicationCommandType,
+    InteractionResponseType, InteractionType
 } from "discord-api-types/v10"
 import { Env } from ".";
-import { deferResponse, jsonResponse } from "./utils";
-import { pubchem } from "./commands/pubchem";
+import { jsonResponse } from "./utils";
+import * as commands from "./commands";
+
+type CommandHandler = {
+    [cmd_name: commands.RitsuSlashCommand["name"]]:
+        commands.RitsuSlashCommand["callback"]
+};
+const commandHandler: CommandHandler = {};
+for (const cmd of Object.values(commands)) {
+    commandHandler[cmd.name] = cmd.callback;
+}
 
 /**
  * Main interaction handler function
@@ -18,37 +27,27 @@ import { pubchem } from "./commands/pubchem";
 export async function handleInteractions(
     request: Request, env: Env, ctx: ExecutionContext
 ): Promise<Response> {
+    /* Let all hell break loose when I add a new command and forget
+     * to sync it. (its like 1 am in the morning and idw create
+     * error handling for this)
+     * 
+     * Refer interactions.ts [line 44]
+     */
+
     let body: APIInteraction = await request.json();
     switch(body.type){
-        //TODO make some simple application command handler which breaks out of
-        // the indentation hell i create with switch...case
-
         case InteractionType.Ping:
             return jsonResponse({type: InteractionResponseType.Pong});
         case InteractionType.ApplicationCommand:
-            body = body as APIChatInputApplicationCommandInteraction;
-            switch(body.data.name) {
-                case "pubchem":
-                    const compound_name = body.data.options![0] as
-                        APIApplicationCommandInteractionDataStringOption;
-                    ctx.waitUntil(pubchem(
-                        compound_name.value, env.RITSU_APP_ID, ctx, body.token
-                    ));
-                    return deferResponse();
-                default:
-                    const response: APIInteractionResponse = {
-                        type: InteractionResponseType.ChannelMessageWithSource,
-                        data: {
-                            content: "Will be implemented soon",
-                            flags: MessageFlags.Ephemeral
-                        }
-                    };
-                    return jsonResponse(response);
+            if (body.data.type === ApplicationCommandType.ChatInput) {
+                body = <APIChatInputApplicationCommandInteraction> body;
+                return commandHandler[body.data.name](body, env, ctx);
             }
+            break;
         case InteractionType.MessageComponent:
-            break
+            break;
         case InteractionType.ModalSubmit:
-            break
+            break;
     }
     return new Response("Handling not implemented yet", { status: 501 });
 }

@@ -112,4 +112,6 @@ export async function verifySig(
             "Received a request with invalid signature", { status: 401 }
         );
     }
+    //FIXME cloned request not read when 401 occurs which leads to annoying
+    // CF warning about wasted memory
 }

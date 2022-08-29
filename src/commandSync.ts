@@ -1,7 +1,8 @@
 import { RouteBases, Routes } from "discord-api-types/v10";
 import { Env } from ".";
-import * as commands from "./commands";
-import { jsonHeaders, jsonResponse } from "./utils";
+import * as commandsWithCallback from "./commands";
+import { RitsuSlashCommand } from "./commands";
+import { jsonHeaders, jsonResponse, Optional } from "./utils";
 
 /**
  * The structure of a client credential access token response sent by Discord
@@ -80,10 +81,14 @@ async function registerGlobalCommands(
     app_id: string, access_token: string
 ): Promise<Response> {
     const commandsURL = RouteBases.api + Routes.applicationCommands(app_id);
+    const commands = Object.values(commandsWithCallback);
+    commands.forEach((
+        cmd: Optional<RitsuSlashCommand, "callback">
+    ) => delete cmd.callback);
     const response = await fetch(commandsURL, {
         method: "PUT",
         headers: { ...jsonHeaders, Authorization: `Bearer ${access_token}` },
-        body: JSON.stringify(Object.values(commands))
+        body: JSON.stringify(commands)
     });
     if (response.ok)
         return new Response("Registered all global commands!");
