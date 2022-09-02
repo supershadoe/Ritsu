@@ -7,9 +7,10 @@ import {
     RESTPostAPIChatInputApplicationCommandsJSONBody
 } from "discord-api-types/v10";
 import { Env } from "..";
-import { DAYS_OF_WEEK, not_impl } from "../utils";
+import { DAYS_OF_WEEK } from "../utils";
 import { pubchem } from "./pubchem";
 import { subsplease } from "./subsplease";
+import { wiki } from "./wiki";
 
 const GuildOnlySlashCommand: Pick<
     RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -82,7 +83,7 @@ export const WIKI: RitsuSlashCommand = {
     name: "wiki",
     description: "Commands to access various wiki pages",
     options: [FANDOM, WIKIPEDIA],
-    callback: not_impl
+    callback: wiki
 };
 
 export const SUBSPLEASE: RitsuSlashCommand = {
