@@ -1,6 +1,8 @@
 import {
+    APIChatInputApplicationCommandInteractionData,
     APIInteractionResponse, InteractionResponseType, MessageFlags, RESTPatchAPIWebhookWithTokenMessageJSONBody, RouteBases, Routes
 } from "discord-api-types/v10";
+import { RitsuSlashCommand } from "./commands";
 
 /** Days of week for using in some commands. */
 export const DAYS_OF_WEEK = [
@@ -65,10 +67,11 @@ export const editInteractionResp = (
 /**
  * The default response sent for commands that don't have an implementation yet.
  *
+ * @param _args The interaction object, env and ctx
  * @returns An ephemeral response object.
  */
- export const not_impl = (..._args: any[]): Response =>
- jsonResponse(<APIInteractionResponse> {
+export const not_impl = (..._args: any): Response =>
+jsonResponse(<APIInteractionResponse> {
      type: InteractionResponseType.ChannelMessageWithSource,
      data: {
          content: "Will be implemented soon",
