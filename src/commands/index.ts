@@ -1,6 +1,7 @@
 `use strict`;
 
 import {
+    APIApplicationCommandSubcommandOption,
     APIChatInputApplicationCommandInteraction,
     ApplicationCommandOptionType, ApplicationCommandType,
     RESTPostAPIChatInputApplicationCommandsJSONBody
@@ -8,6 +9,7 @@ import {
 import { Env } from "..";
 import { DAYS_OF_WEEK, not_impl } from "../utils";
 import { pubchem } from "./pubchem";
+import { subsplease } from "./subsplease";
 
 const GuildOnlySlashCommand: Pick<
     RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -41,10 +43,10 @@ export const PUBCHEM: RitsuSlashCommand = {
     callback: pubchem
 };
 
-export const FANDOM: RitsuSlashCommand = {
-    ...GuildOnlySlashCommand,
+const FANDOM: APIApplicationCommandSubcommandOption = {
     name: "fandom",
     description: "Search for any article from any fandom",
+    type: ApplicationCommandOptionType.Subcommand,
     options: [
         {
             name: "search_term",
@@ -58,14 +60,13 @@ export const FANDOM: RitsuSlashCommand = {
             type: ApplicationCommandOptionType.String,
             required: true
         }
-    ],
-    callback: not_impl
+    ]
 };
 
-export const WIKIPEDIA: RitsuSlashCommand = {
-    ...GuildOnlySlashCommand,
+const WIKIPEDIA: APIApplicationCommandSubcommandOption = {
     name: "wikipedia",
     description: "Search for any article from wikipedia",
+    type: ApplicationCommandOptionType.Subcommand,
     options: [
         {
             name: "search_term",
@@ -73,7 +74,14 @@ export const WIKIPEDIA: RitsuSlashCommand = {
             type: ApplicationCommandOptionType.String,
             required: true
         }
-    ],
+    ]
+};
+
+export const WIKI: RitsuSlashCommand = {
+    ...GuildOnlySlashCommand,
+    name: "wiki",
+    description: "Commands to access various wiki pages",
+    options: [FANDOM, WIKIPEDIA],
     callback: not_impl
 };
 
@@ -97,7 +105,6 @@ export const SUBSPLEASE: RitsuSlashCommand = {
             ]
         }
     ],
-    callback: not_impl
+    callback: subsplease
 };
-// TODO default: DAYS_OF_WEEK[(new Date()).getDay()],
 // TODO create a KV Namespace with all command ids for both testing and stable bot.
