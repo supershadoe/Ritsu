@@ -1,8 +1,8 @@
+`use strict`;
+
 import {
-    APIChatInputApplicationCommandInteractionData,
     APIInteractionResponse, InteractionResponseType, MessageFlags, RESTPatchAPIWebhookWithTokenMessageJSONBody, RouteBases, Routes
 } from "discord-api-types/v10";
-import { RitsuSlashCommand } from "./commands";
 
 /** Days of week for using in some commands. */
 export const DAYS_OF_WEEK = [

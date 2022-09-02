@@ -1,3 +1,5 @@
+`use strict`;
+
 import {
     APIActionRowComponent, APIApplicationCommandInteractionDataStringOption,
     APIButtonComponentWithCustomId, APIChatInputApplicationCommandInteraction,

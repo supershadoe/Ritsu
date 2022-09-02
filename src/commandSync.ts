@@ -1,3 +1,5 @@
+`use strict`;
+
 import { RouteBases, Routes } from "discord-api-types/v10";
 import { Env } from ".";
 import * as commandsWithCallback from "./commands";
