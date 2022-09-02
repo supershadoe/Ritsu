@@ -83,7 +83,9 @@ async function fetchScheduleAndRespond(
             interactionResponse.content =
                 "Error while fetching the schedule.\nAPI responded with"
                 + `**${response.status}**: **${response.statusText}**.`;
-            return editInteractionResp(appID, interactionToken, interactionResponse);
+            return editInteractionResp(
+                appID, interactionToken, interactionResponse
+            );
         }
         ctx.waitUntil(cache.put(requestURL, response.clone()));
     }
@@ -104,7 +106,9 @@ async function fetchScheduleAndRespond(
             placeholder: "Select a day"
         }]
     }];
-    return await editInteractionResp(appID, interactionToken, interactionResponse);
+    return await editInteractionResp(
+        appID, interactionToken, interactionResponse
+    );
 }
 
 /**
@@ -124,20 +128,17 @@ export function subsplease(
             interaction.data.options![0];
     switch(subcmd.name) {
         case "schedule":
-            const options = subcmd.options;
-            let day: string | undefined = undefined;
-            if (options) {
-                const option = <
-                    APIApplicationCommandInteractionDataStringOption | undefined
-                > options[0];
-                day = option ? option.value: undefined;
-            }
+            const dayOption =
+                <APIApplicationCommandInteractionDataStringOption | undefined>
+                    subcmd.options![0];
+            const day = dayOption ? dayOption.value: undefined;
             ctx.waitUntil(fetchScheduleAndRespond(
                 day, env.RITSU_APP_ID, ctx, interaction.token
             ));
-            return deferResponse();
+            break;
         default:
             return not_impl();
     }
+    return deferResponse();
     // TODO add callback to slash command options also so that we can avoid this clusterf
 }
