@@ -10,13 +10,13 @@ import { Env } from "..";
 import { deferResponse, editInteractionResp } from "../utils";
 
 /** The basic URL of PubChem's site. */
-const pubchemURL = "https://pubchem.ncbi.nlm.nih.gov";
+const PUBCHEM_URL = "https://pubchem.ncbi.nlm.nih.gov";
 
 /** The PUG REST API URL. */
-const pugAPIURL = `${pubchemURL}/rest/pug`;
+const PUG_API_URL = `${PUBCHEM_URL}/rest/pug`;
 
 /** The properties requested for a compound from PubChem. */
-const requiredProperties = [
+const REQUIRED_PROPERTIES = [
     "Title", "IUPACName", "MolecularFormula", "MolecularWeight", "Charge"
 ];
 
@@ -65,9 +65,9 @@ type pubchemComponents = (
  */
 function generateEmbeds(
     propTable: PubchemCompoundPropertyTable, compound: number = 0
-): APIEmbed[] {
+): [APIEmbed] {
     const firstCompound = propTable.Properties[compound];
-    const imageURL = `${pugAPIURL}/compound/cid/${firstCompound.CID}/PNG`;
+    const imageURL = `${PUG_API_URL}/compound/cid/${firstCompound.CID}/PNG`;
     const embed: APIEmbed = {
         title: firstCompound.Title,
         color: 0xF6CEE7,
@@ -78,7 +78,7 @@ function generateEmbeds(
             {name: "Molecular Weight", value: firstCompound.MolecularWeight},
         ],
         footer: {
-            text: "Fetched from PubChem", icon_url: `${pubchemURL}/favicon.ico`
+            text: "Fetched from PubChem", icon_url: `${PUBCHEM_URL}/favicon.ico`
         },
         image: { url: `${imageURL}?record_type=2d` }
     };
@@ -146,15 +146,15 @@ async function fetchDataAndRespond(
 ): Promise<Response> {
     const cache = caches.default;
     const requestURL =
-        `${pugAPIURL}/compound/name/${compoundName}/property`
-        + `/${requiredProperties.join()}/JSON`;
+        `${PUG_API_URL}/compound/name/${compoundName}/property`
+        + `/${REQUIRED_PROPERTIES.join()}/JSON`;
     let response = await cache.match(requestURL);
     const interactionResponse: RESTPatchAPIWebhookWithTokenMessageJSONBody = {};
 
     if (! response) {
         response = await fetch(requestURL);
         if (! response.ok) {
-            const error = (await response.json() as PubchemError).Fault;
+            const error = (await response.json<PubchemError>()).Fault;
             interactionResponse.content = 
                     "Error while fetching data from Pubchem.\nAPI "
                     + `responded with **${error.Code}** _«${error.Message}»_`
@@ -168,7 +168,7 @@ async function fetchDataAndRespond(
     }
 
     const propTable = (
-        await response.json() as PubchemCompoundPropTableResp
+        await response.json<PubchemCompoundPropTableResp>()
     )["PropertyTable"];
 
     interactionResponse.content =
@@ -189,7 +189,6 @@ async function fetchDataAndRespond(
  * @param ctx The execution context.
  * @returns A deferred response object to wait till data is fetched.
  */
-
 export function pubchem(
     interaction: APIChatInputApplicationCommandInteraction,
     env: Env, ctx: ExecutionContext

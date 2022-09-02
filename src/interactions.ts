@@ -36,7 +36,7 @@ export async function handleInteractions(
      * Refer interactions.ts [line 44]
      */
 
-    let body: APIInteraction = await request.json();
+    let body = await request.json<APIInteraction>();
     switch(body.type){
         case InteractionType.Ping:
             return jsonResponse({type: InteractionResponseType.Pong});
