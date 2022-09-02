@@ -160,7 +160,7 @@ async function fetchDataAndRespond(
                     + `responded with **${error.Code}** _«${error.Message}»_`
                     + ` - "**__${error.Details}__**".`
             ;
-            return editInteractionResp(
+            return await editInteractionResp(
                 appID, interactionToken, interactionResponse
             );
         }

@@ -59,7 +59,7 @@ function generateEmbeds(
  * The primary command handler for `subsplease schedule` command which fetches
  * results from the subsplease's API and responds to the interaction.
  *
- * @param day The day of week to show the schedule for primarily.
+ * @param day The day of week to show the schedule for.
  * @param appID The application ID of the bot.
  * @param ctx The execution context to use for caching.
  * @param interactionToken The token for the current interaction to edit the
@@ -83,7 +83,7 @@ async function fetchScheduleAndRespond(
             interactionResponse.content =
                 "Error while fetching the schedule.\nAPI responded with"
                 + `**${response.status}**: **${response.statusText}**.`;
-            return editInteractionResp(
+            return await editInteractionResp(
                 appID, interactionToken, interactionResponse
             );
         }

@@ -18,6 +18,12 @@ const WIKI_URLS = {
         `https://${language}.wikipedia.org/w/api.php`
 };
 
+/**
+ * Type guard to restrict the type of subcommand name.
+ * 
+ * @param cmdName The name of subcommand.
+ * @returns true if the command has handler else false.
+ */
 function knownCommand(cmdName: string): cmdName is "fandom" | "wikipedia" {
     return ["fandom", "wikipedia"].includes(cmdName)
 }
@@ -34,6 +40,16 @@ interface WikiResponse {
     3: string[];
 }
 
+/**
+ * The primary command handler for `wiki {}` command which performs an
+ * opensearch using MediaWiki API and responds to the interaction.
+ *
+ * @param searchTerm The search term to fetch the data for.
+ * @param appID The application ID of the bot.
+ * @param ctx The execution context to use for caching.
+ * @param interactionToken The token for the current interaction to edit the
+ * deferred message.
+ */
 async function fetchArticleAndRespond(
     searchTerm: string, subdomain: string,
     behaviourFlag: "fandom" | "wikipedia", appID: string,
@@ -56,7 +72,7 @@ async function fetchArticleAndRespond(
             interactionResponse.content =
                 "Error while fetching the article.\nAPI responded with"
                 + `**${response.status}**: **${response.statusText}**.`;
-            return editInteractionResp(
+            return await editInteractionResp(
                 appID, interactionToken, interactionResponse
             );
         }
@@ -67,7 +83,7 @@ async function fetchArticleAndRespond(
     if (results[1].length < 1) {
         interactionResponse.content =
             `No search results found for ${searchTerm}`;
-        return editInteractionResp(
+        return await editInteractionResp(
             appID, interactionToken, interactionResponse
         );
     }
@@ -89,10 +105,23 @@ async function fetchArticleAndRespond(
             }]
         }];
 
-    return editInteractionResp(appID, interactionToken, interactionResponse);
+    return await editInteractionResp(
+        appID, interactionToken, interactionResponse
+    );
 }
 
-export function wiki(interaction: APIChatInputApplicationCommandInteraction, env: Env, ctx: ExecutionContext): Response {
+/**
+ * Interaction handler for `/wiki` command.
+ *
+ * @param interaction The interaction object sent by Discord.
+ * @param env The env at the time of execution.
+ * @param ctx The execution context.
+ * @returns A deferred response object to wait till data is fetched.
+ */
+export function wiki(
+    interaction: APIChatInputApplicationCommandInteraction,
+    env: Env, ctx: ExecutionContext
+): Response {
     const subcmd =
         <APIApplicationCommandInteractionDataSubcommandOption>
             interaction.data.options![0];
