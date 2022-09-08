@@ -1,4 +1,4 @@
 name = "ritsu"
 main = "src/index.ts"
 workers_dev = false
-compatibility_date = "2022-08-21"
+compatibility_date = "2022-09-08"
