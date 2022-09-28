@@ -60,8 +60,6 @@ export const editInteractionResp = (
         body: JSON.stringify(interactionResponse)
     }
     // FIXME using phenyl as search term breaks this :hmm:
-    // also some stuff are missing in resp check that
-    // also it feels kinda slower idk
 );
 
 /**
