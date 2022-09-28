@@ -17,7 +17,6 @@
     "itty-router": "^2.6"
   },
   "scripts": {
-    "start": "wrangler dev",
-    "deploy": "wrangler publish"
+    "start": "wrangler dev"
   }
 }
