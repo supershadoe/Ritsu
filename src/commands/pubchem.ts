@@ -1,13 +1,34 @@
 `use strict`;
 
+import { isChatInputApplicationCommandInteraction } from "discord-api-types/utils/v10";
 import {
     APIActionRowComponent, APIApplicationCommandInteractionDataStringOption,
     APIButtonComponentWithCustomId, APIChatInputApplicationCommandInteraction,
-    APIEmbed, APISelectMenuComponent, APISelectMenuOption,
-    ButtonStyle, ComponentType, RESTPatchAPIWebhookWithTokenMessageJSONBody
+    APIChatInputApplicationCommandInteractionData,
+    APIEmbed, APIInteraction, APIMessageButtonInteractionData, APIMessageComponentInteraction, APIMessageStringSelectInteractionData, APISelectMenuComponent, APISelectMenuOption,
+    ApplicationCommandType,
+    ButtonStyle, ComponentType, InteractionResponseType, InteractionType, RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
 import { Env } from "..";
-import { deferResponse, editInteractionResp } from "../utils";
+import { deferResponse, editInteractionResp, not_impl } from "../utils";
+
+export interface PubchemCommandInteraction extends APIChatInputApplicationCommandInteraction {
+    data: APIChatInputApplicationCommandInteractionData & {
+        options: [
+            APIApplicationCommandInteractionDataStringOption & {
+                name: "compound_name"
+            }
+        ]
+    }
+}
+
+export interface PubchemComponentInteraction extends
+APIMessageComponentInteraction {
+    data:
+        APIMessageButtonInteractionData | APIMessageStringSelectInteractionData & {
+            custom_id: "pubchem_toggleDim" | "pubchem_searchResults"
+        }
+}
 
 /** The basic URL of PubChem's site. */
 const PUBCHEM_URL = "https://pubchem.ncbi.nlm.nih.gov";
@@ -181,6 +202,12 @@ async function fetchDataAndRespond(
     );
 }
 
+function isSlashCommandInt(interaction: APIInteraction): interaction is PubchemCommandInteraction {
+    return (
+        (interaction.type === InteractionType.ApplicationCommand) && (interaction.data.type === ApplicationCommandType.ChatInput)
+    );
+}
+
 /**
  * Interaction handler for `/pubchem` command.
  *
@@ -189,15 +216,14 @@ async function fetchDataAndRespond(
  * @param ctx The execution context.
  * @returns A deferred response object to wait till data is fetched.
  */
-export function pubchem(
-    interaction: APIChatInputApplicationCommandInteraction,
-    env: Env, ctx: ExecutionContext
+export default function (
+    interaction: APIInteraction, env: Env, ctx: ExecutionContext
 ): Response {
-    // This option is declared as required so it definitely can't be undefined.
-    const compound_name = interaction.data.options![0] as
-        APIApplicationCommandInteractionDataStringOption;
-    ctx.waitUntil(fetchDataAndRespond(
-        compound_name.value, env.RITSU_APP_ID, ctx, interaction.token
-    ));
-    return deferResponse();
+    if (isSlashCommandInt(interaction)) {
+        ctx.waitUntil(fetchDataAndRespond(
+            interaction.data.options[0].value, env.RITSU_APP_ID, ctx, interaction.token
+        ));
+        return deferResponse();
+    }
+    return not_impl();
 }

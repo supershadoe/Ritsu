@@ -4,11 +4,28 @@ import {
     APIApplicationCommandInteractionDataStringOption,
     APIApplicationCommandInteractionDataSubcommandOption,
     APIChatInputApplicationCommandInteraction,
+    APIChatInputApplicationCommandInteractionData,
+    APIInteraction,
+    ApplicationCommandType,
     ComponentType,
+    InteractionType,
     RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
 import { Env } from "..";
 import { deferResponse, editInteractionResp, not_impl } from "../utils";
+
+interface SubcommandStructure extends APIApplicationCommandInteractionDataSubcommandOption {
+    name: "fandom" | "wikipedia",
+    options: (APIApplicationCommandInteractionDataStringOption & {
+        name: "fandom_name" | "search_term"
+    })[]
+}
+
+export interface WikiCommandInteraction extends APIChatInputApplicationCommandInteraction {
+    data: APIChatInputApplicationCommandInteractionData & {
+        options: [SubcommandStructure]  
+    }
+};
 
 /** API URLS of the wikis. */
 const WIKI_URLS = {
@@ -17,16 +34,6 @@ const WIKI_URLS = {
     wikipedia: (language: string) =>
         `https://${language}.wikipedia.org/w/api.php`
 };
-
-/**
- * Type guard to restrict the type of subcommand name.
- * 
- * @param cmdName The name of subcommand.
- * @returns true if the command has handler else false.
- */
-function knownCommand(cmdName: string): cmdName is "fandom" | "wikipedia" {
-    return ["fandom", "wikipedia"].includes(cmdName)
-}
 
 /** A model of the response from MediaWiki opensearch. */
 interface WikiResponse {
@@ -110,6 +117,12 @@ async function fetchArticleAndRespond(
     );
 }
 
+function isSlashCommandInt(interaction: APIInteraction): interaction is WikiCommandInteraction {
+    return (
+        (interaction.type === InteractionType.ApplicationCommand) && (interaction.data.type === ApplicationCommandType.ChatInput)
+    );
+}
+
 /**
  * Interaction handler for `/wiki` command.
  *
@@ -118,31 +131,27 @@ async function fetchArticleAndRespond(
  * @param ctx The execution context.
  * @returns A deferred response object to wait till data is fetched.
  */
-export function wiki(
-    interaction: APIChatInputApplicationCommandInteraction,
+export default function(
+    interaction: APIInteraction,
     env: Env, ctx: ExecutionContext
 ): Response {
-    const subcmd =
-        <APIApplicationCommandInteractionDataSubcommandOption>
-            interaction.data.options![0];
-    if (! knownCommand(subcmd.name))
-        return not_impl();
+    if (isSlashCommandInt(interaction)) {
+        const subcmd = interaction.data.options[0];
 
-    const options =
-        <APIApplicationCommandInteractionDataStringOption[]>
-            subcmd.options!;
-    let [searchTerm, subdomain] = ["", "en"];
-    options.forEach(opt => {
-        if (opt.name === "fandom_name")
-            subdomain = opt.value;
-        else if (opt.name === "search_term")
-            searchTerm = opt.value;
-    });
+        let [searchTerm, subdomain] = ["", "en"];
+        subcmd.options.forEach(opt => {
+            if (opt.name === "fandom_name")
+                subdomain = opt.value;
+            else if (opt.name === "search_term")
+                searchTerm = opt.value;
+        });
 
-    ctx.waitUntil(fetchArticleAndRespond(
-        searchTerm, subdomain, subcmd.name, env.RITSU_APP_ID, ctx,
-        interaction.token
-    ));
+        ctx.waitUntil(fetchArticleAndRespond(
+            searchTerm, subdomain, subcmd.name, env.RITSU_APP_ID, ctx,
+            interaction.token
+        ));
 
-    return deferResponse();
+        return deferResponse();
+    }
+    return not_impl();
 }

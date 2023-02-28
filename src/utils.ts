@@ -1,13 +1,10 @@
 `use strict`;
 
 import {
-    APIInteractionResponse, InteractionResponseType, MessageFlags, RESTPatchAPIWebhookWithTokenMessageJSONBody, RouteBases, Routes
+    APIInteractionResponse, InteractionResponseType, MessageFlags,
+    RESTPatchAPIWebhookWithTokenMessageJSONBody,
+    RouteBases, Routes
 } from "discord-api-types/v10";
-
-/** Days of week for using in some commands. */
-export const DAYS_OF_WEEK = [
-    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-]
 
 /** Content-Type header for response with JSON body. */
 export const jsonHeaders = {
@@ -75,4 +72,4 @@ jsonResponse(<APIInteractionResponse> {
          content: "Will be implemented soon",
          flags: MessageFlags.Ephemeral
      }
- });
+});
