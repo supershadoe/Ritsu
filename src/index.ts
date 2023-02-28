@@ -1,6 +1,5 @@
 `use strict`;
 
-import { Router } from "itty-router";
 import { syncCommands } from "./commandSync"
 import { handleInteractions } from "./interactions";
 import { checkForSigAndTS, verifySig } from "./verifyInter";
@@ -15,23 +14,38 @@ import { checkForSigAndTS, verifySig } from "./verifyInter";
 
     TRUSTED_LOCAL_ENV: boolean | undefined;
     RITSU_CLIENT_SECRET: string | undefined;
+};
+
+type HandlerArgs = [Request, Env, ExecutionContext];
+
+const routeMap: Record<string, (a: HandlerArgs) => Promise<Response>> = {
+    async POST(a) {
+        return (
+            await checkForSigAndTS(...a)
+            ?? await verifySig(...a)
+            ?? await handleInteractions(...a)
+        );
+    },
+    async GET(a) {
+        if (new URL(a[0].url).pathname === "/sync-cmds") {
+            return await syncCommands(...a);
+        }
+        return this.default(a);
+    },
+    async default(a) {
+        return Response.redirect(
+            "Invalid request: Access through discord.", 301
+        );
+    }
 }
 
-const router = Router();
-router
-    .get("/sync-cmds", syncCommands)
-    .get("*", (..._args) => new Response(
-        "This API is supposed to be accessed using discord", { status: 400 }
-    ))
-    .post("*", checkForSigAndTS, verifySig, handleInteractions)
-    .all("*", (..._args) => new Response(
-        /*
-        * 501 imo means more like a proper request but I haven't implemented it
-        * server-side while 400 is just a bad request... An issue on the part of
-        * user.
-        */
-        "Not something that I was designed to do", { status: 400 }
-    ))
-    ;
-
-export default { fetch: router.handle };
+export default {
+    async fetch(...a: HandlerArgs): Promise<Response> {
+        const meth = a[0].method;
+        return (
+            meth in routeMap
+            ? await routeMap.meth(a)
+            : await routeMap.default(a)
+        );
+    }
+};
