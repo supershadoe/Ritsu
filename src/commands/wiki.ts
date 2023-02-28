@@ -77,7 +77,7 @@ async function fetchArticleAndRespond(
         response = await fetch(requestURL);
         if (! response.ok) {
             interactionResponse.content =
-                "Error while fetching the article.\nAPI responded with"
+                "Error while fetching the article.\nAPI responded with "
                 + `**${response.status}**: **${response.statusText}**.`;
             return await editInteractionResp(
                 appID, interactionToken, interactionResponse
