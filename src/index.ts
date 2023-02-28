@@ -33,31 +33,33 @@ const callbacks = { pubchem, wiki };
  * @param ctx The execution context for performing certain tasks.
  * @returns A promise for the response which is to be sent.
  */
-async function handleInteractions(
-    request: Request, env: Env, ctx: ExecutionContext
-): Promise<Response> {
-    let body = await request.json<APIInteraction>();
+async function handleInteractions(a: HandlerArgs, body?: string): Promise<Response> {
+    if (!body)
+        return new Response("Bad request.", {status: 400});
+    const [_, ...b] = a;
+    const inter = JSON.parse(body) as APIInteraction;
     let name = null;
-    switch(body.type){
+    switch(inter.type){
         case InteractionType.Ping:
             return jsonResponse({type: InteractionResponseType.Pong});
         case InteractionType.ApplicationCommand:
         case InteractionType.ApplicationCommandAutocomplete:
-            name = body.data.name as keyof typeof callbacks;
-            return callbacks[name](body, env, ctx);
+            name = inter.data.name as keyof typeof callbacks;
+            return callbacks[name](inter, ...b);
         case InteractionType.MessageComponent:
         case InteractionType.ModalSubmit:
-            name = body.data.custom_id.split('_')[0] as keyof typeof callbacks;
-            return callbacks[name](body, env, ctx)
+            name = inter.data.custom_id.split('_')[0] as keyof typeof callbacks;
+            return callbacks[name](inter, ...b);
     }
 }
 
 const routeMap: Record<string, (a: HandlerArgs) => Promise<Response>> = {
     async POST(a) {
+        const _body: {body?: string} = {};
         return (
             await checkForSigAndTS(...a)
-            ?? await verifySig(...a)
-            ?? await handleInteractions(...a)
+            ?? await verifySig(...a, _body)
+            ?? await handleInteractions(a, _body.body)
         );
     },
     async GET(a) {
@@ -67,8 +69,8 @@ const routeMap: Record<string, (a: HandlerArgs) => Promise<Response>> = {
         return this.default(a);
     },
     async default(a) {
-        return Response.redirect(
-            "Invalid request: Access through discord.", 301
+        return new Response(
+            "Invalid request: Access through discord.", { status: 400 }
         );
     }
 }
@@ -78,7 +80,7 @@ export default {
         const meth = a[0].method;
         return (
             meth in routeMap
-            ? await routeMap.meth(a)
+            ? await routeMap[meth](a)
             : await routeMap.default(a)
         );
     }

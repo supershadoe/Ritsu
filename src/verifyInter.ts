@@ -101,17 +101,16 @@ export async function checkForSigAndTS(
  * @returns A response if the request is invalid.
  */
 export async function verifySig(
-    request: Request, env: Env, _: ExecutionContext
+    request: Request, env: Env, _: ExecutionContext,
+    _body: {body?: string}
 ): Promise<Response | undefined> {
     const pubKey = await importPubKey(env.RITSU_APP_PUB_KEY);
     const signature = <string> request.headers.get("X-Signature-ED25519");
     const timestamp = <string> request.headers.get("X-Signature-Timestamp");
-    const body = await request.clone().text();
-    if (! await verify(pubKey, signature, timestamp, body) ) {
+    _body.body = await request.text();
+    if (! await verify(pubKey, signature, timestamp, _body.body) ) {
         return new Response(
             "Received a request with invalid signature", { status: 401 }
         );
     }
-    //FIXME cloned request not read when 401 occurs which leads to annoying
-    // CF warning about wasted memory
 }
