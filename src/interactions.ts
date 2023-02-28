@@ -1,10 +1,9 @@
-`use strict`;
-
 import {
-    APIChatInputApplicationCommandInteraction, APIInteraction,
-    ApplicationCommandType,
-    InteractionResponseType, InteractionType
+    APIInteraction, InteractionResponseType, InteractionType
 } from "discord-api-types/v10"
+import {
+    isChatInputApplicationCommandInteraction
+} from "discord-api-types/utils/v10";
 import { Env } from ".";
 import { jsonResponse } from "./utils";
 import * as commands from "./commands";
@@ -29,21 +28,15 @@ for (const cmd of Object.values(commands)) {
 export async function handleInteractions(
     request: Request, env: Env, ctx: ExecutionContext
 ): Promise<Response> {
-    /* Let all hell break loose when I add a new command and forget
-     * to sync it. (its like 1 am in the morning and idw create
-     * error handling for this)
-     * 
-     * Refer interactions.ts [line 44]
-     */
-
     let body = await request.json<APIInteraction>();
     switch(body.type){
         case InteractionType.Ping:
             return jsonResponse({type: InteractionResponseType.Pong});
         case InteractionType.ApplicationCommand:
-            if (body.data.type === ApplicationCommandType.ChatInput) {
-                body = <APIChatInputApplicationCommandInteraction> body;
-                return commandHandler[body.data.name](body, env, ctx);
+            if (isChatInputApplicationCommandInteraction(body)) {
+                if (body.data.name in commandHandler) {
+                    return commandHandler[body.data.name](body, env, ctx);
+                }
             }
             break;
         case InteractionType.MessageComponent:
