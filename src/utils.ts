@@ -56,7 +56,6 @@ export const editInteractionResp = (
         headers: jsonHeaders,
         body: JSON.stringify(interactionResponse)
     }
-    // FIXME using phenyl as search term breaks this :hmm:
 );
 
 /**

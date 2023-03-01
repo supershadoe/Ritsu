@@ -42,14 +42,21 @@ const REQUIRED_PROPERTIES = [
 
 /** A model of the property table for proper typing. */
 interface PubchemCompoundPropertyTable {
-    Properties: {[index: number]: {
+    Properties: Record<number, {
+        /** Compound ID for a particular compound */
         CID: number;
+        /** Common name of that compound */
         Title: string;
-        IUPACName: string;
+        /**
+         * IUPAC Name of that compound.
+         * 
+         * Field missing for stuff like phenyl
+         */
+        IUPACName?: string;
         MolecularFormula: string;
         MolecularWeight: string;
         Charge: number;
-    }};
+    }>
 }
 
 /** A model of the response sent by PubChem for proper typing. */
@@ -88,22 +95,26 @@ function generateEmbeds(
 ): [APIEmbed] {
     const firstCompound = propTable.Properties[compound];
     const imageURL = `${PUG_API_URL}/compound/cid/${firstCompound.CID}/PNG`;
-    const embed: APIEmbed = {
+    const embed = {
         title: firstCompound.Title,
         color: 0xF6CEE7,
         thumbnail: { url: `${imageURL}?record_type=3d&image_size=small` },
         fields: [
-            {name: "IUPAC Name", value: firstCompound.IUPACName},
             {name: "Molecular Formula", value: firstCompound.MolecularFormula},
             {name: "Molecular Weight", value: firstCompound.MolecularWeight},
         ],
         footer: {
             text: "Fetched from PubChem", icon_url: `${PUBCHEM_URL}/favicon.ico`
         },
-        image: { url: `${imageURL}?record_type=2d` }
-    };
+        image: { url: `${imageURL}?record_type=2d` },
+        url: `${PUBCHEM_URL}/compound/${firstCompound.CID}`
+    } satisfies APIEmbed;
+    if (firstCompound.IUPACName)
+        embed.fields.push({
+            name: "IUPAC Name", value: firstCompound.IUPACName
+        });
     if (firstCompound.Charge)
-        embed.fields?.push({
+        embed.fields.push({
             name: "Charge", value: firstCompound.Charge.toString()
         });
 
@@ -190,6 +201,7 @@ async function fetchDataAndRespond(
     const propTable = (
         await response.json<PubchemCompoundPropTableResp>()
     )["PropertyTable"];
+    console.log(JSON.stringify(propTable))
 
     interactionResponse.content =
         `Here's the data found for '${compoundName}'.`;
