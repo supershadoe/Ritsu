@@ -7,7 +7,7 @@ import {
     RESTPostAPIApplicationCommandsJSONBody
 } from "discord-api-types/v10";
 
-const commands: RESTPostAPIApplicationCommandsJSONBody[] = [
+const commands = [
     {
         name: "pubchem",
         description: "Fetch the details of a compound from PubChem",
@@ -23,7 +23,7 @@ const commands: RESTPostAPIApplicationCommandsJSONBody[] = [
         ],
         dm_permission: false,
         type: ApplicationCommandType.ChatInput
-    },
+    } satisfies RESTPostAPIApplicationCommandsJSONBody,
     {
         name: "wiki",
         description: "Commands to access various wiki pages",
@@ -75,7 +75,7 @@ const commands: RESTPostAPIApplicationCommandsJSONBody[] = [
         ],
         dm_permission: false,
         type: ApplicationCommandType.ChatInput
-    }
+    } satisfies RESTPostAPIApplicationCommandsJSONBody
 ];
 
 export default commands;
