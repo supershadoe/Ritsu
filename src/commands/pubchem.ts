@@ -3,10 +3,11 @@
 import {
     APIActionRowComponent, APIApplicationCommandInteractionDataStringOption,
     APIButtonComponentWithCustomId, APIChatInputApplicationCommandInteraction,
-    APIChatInputApplicationCommandInteractionData,
-    APIEmbed, APIInteraction, APIMessageButtonInteractionData, APIMessageComponentInteraction, APIMessageStringSelectInteractionData, APISelectMenuComponent, APISelectMenuOption,
-    ApplicationCommandType,
-    ButtonStyle, ComponentType, InteractionType, RESTPatchAPIWebhookWithTokenMessageJSONBody
+    APIChatInputApplicationCommandInteractionData, APIEmbed, APIInteraction,
+    APIMessageButtonInteractionData, APIMessageComponentInteraction,
+    APIMessageStringSelectInteractionData, APISelectMenuOption,
+    APIStringSelectComponent, ApplicationCommandType, ButtonStyle,
+    ComponentType, InteractionType, RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
 import { Env } from "..";
 import { deferResponse, editInteractionResp, not_impl } from "../utils";
@@ -40,9 +41,8 @@ const REQUIRED_PROPERTIES = [
     "Title", "IUPACName", "MolecularFormula", "MolecularWeight", "Charge"
 ];
 
-/** A model of the property table for proper typing. */
-interface PubchemCompoundPropertyTable {
-    Properties: Record<number, {
+/** A model of the each compound received for proper typing. */
+interface CompoundProps {
         /** Compound ID for a particular compound */
         CID: number;
         /** Common name of that compound */
@@ -56,12 +56,6 @@ interface PubchemCompoundPropertyTable {
         MolecularFormula: string;
         MolecularWeight: string;
         Charge: number;
-    }>
-}
-
-/** A model of the response sent by PubChem for proper typing. */
-interface PubchemCompoundPropTableResp {
-    PropertyTable: PubchemCompoundPropertyTable
 }
 
 /** A model of the error response sent by PubChem for proper typing. */
@@ -73,14 +67,6 @@ interface PubchemError {
     }
 }
 
-/** Type alias for the components that are sent by the bot. */
-type pubchemComponents = (
-    [APIActionRowComponent<APIButtonComponentWithCustomId>]
-    | [
-        APIActionRowComponent<APISelectMenuComponent>, APIActionRowComponent<APIButtonComponentWithCustomId>
-    ]
-);
-
 /**
  * Embed generator for sending in response.
  *
@@ -91,9 +77,9 @@ type pubchemComponents = (
  * @returns An array of embeds containing a single embed.
  */
 function generateEmbeds(
-    propTable: PubchemCompoundPropertyTable, compound: number = 0
+    compounds: CompoundProps[], compound: number = 0
 ): [APIEmbed] {
-    const firstCompound = propTable.Properties[compound];
+    const firstCompound = compounds[compound];
     const imageURL = `${PUG_API_URL}/compound/cid/${firstCompound.CID}/PNG`;
     const embed = {
         title: firstCompound.Title,
@@ -124,40 +110,39 @@ function generateEmbeds(
 /**
  * Message component generator to attach components to the message thats sent.
  *
- * @param propTable The propTable to generate the select menu from (to switch
+ * @param compounds The propTable to generate the select menu from (to switch
  * between search results).
  * @returns An array of either a button alone or a button and a select menu.
  */
-function generateComponents(
-    propTable: PubchemCompoundPropertyTable
-): pubchemComponents {
-    let components: pubchemComponents =[{
+function generateComponents(compounds: CompoundProps[]) {
+    const components = [];
+
+    if (compounds.length > 1) {
+        const options: APISelectMenuOption[] = compounds.map(compound => ({
+            value: compound.CID.toString(),
+            label: compound.Title
+        }));
+        components.push({
+            type: ComponentType.ActionRow,
+            components: [{
+                options,
+                type: ComponentType.StringSelect,
+                custom_id: "pubchem_switchLink",
+                placeholder: "Select a compound"
+            }]
+        } satisfies APIActionRowComponent<APIStringSelectComponent>);
+    }
+
+    components.push({
         type: ComponentType.ActionRow,
         components: [{
             type: ComponentType.Button,
             label: "Flatten Structure",
             style: ButtonStyle.Primary,
-            custom_id: "pubchem-toggleDim"
+            custom_id: "pubchem_toggleDim"
         }]
-    }];
-    const results = Object.values(propTable.Properties)
-    if (results.length > 2) {
-        const results: APISelectMenuOption[] = Object.values(
-            propTable.Properties).map((compound, index) => ({
-                value: `pubchem-result-${index}`, 
-                label: compound.Title
-            }));
-        const selMenu: APIActionRowComponent<APISelectMenuComponent> = {
-            type: ComponentType.ActionRow,
-            components: [{
-                type: ComponentType.SelectMenu,
-                custom_id: "pubchem-searchResults",
-                options: results,
-                placeholder: "Select a compound"
-            }]
-        };
-        components = [selMenu, ...components];
-    }
+    } satisfies APIActionRowComponent<APIButtonComponentWithCustomId>);
+
     return components;
 }
 
@@ -198,15 +183,14 @@ async function fetchDataAndRespond(
         ctx.waitUntil(cache.put(requestURL, response.clone()));
     }
 
-    const propTable = (
-        await response.json<PubchemCompoundPropTableResp>()
-    )["PropertyTable"];
-    console.log(JSON.stringify(propTable))
+    type RespT = { PropertyTable: { Properties: CompoundProps[] } };
+    const compounds = (await response.json<RespT>()).PropertyTable.Properties;
+    console.log(JSON.stringify(compounds))
 
     interactionResponse.content =
         `Here's the data found for '${compoundName}'.`;
-    interactionResponse.embeds = generateEmbeds(propTable);
-    interactionResponse.components = generateComponents(propTable);
+    interactionResponse.embeds = generateEmbeds(compounds);
+    interactionResponse.components = generateComponents(compounds);
 
     return await editInteractionResp(
         appID, interactionToken, interactionResponse
