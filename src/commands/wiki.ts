@@ -5,10 +5,7 @@ import {
     APIApplicationCommandInteractionDataSubcommandOption,
     APIChatInputApplicationCommandInteraction,
     APIChatInputApplicationCommandInteractionData,
-    APIInteraction,
-    ApplicationCommandType,
-    ComponentType,
-    InteractionType,
+    APIInteraction, ApplicationCommandType, ComponentType, InteractionType,
     RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
 import { Env } from "..";
@@ -17,7 +14,7 @@ import { deferResponse, editInteractionResp, not_impl } from "../utils";
 interface SubcommandStructure extends APIApplicationCommandInteractionDataSubcommandOption {
     name: "fandom" | "wikipedia",
     options: (APIApplicationCommandInteractionDataStringOption & {
-        name: "fandom_name" | "search_term"
+        name: "fandom_name" | "search_term" | "language"
     })[]
 }
 
@@ -102,8 +99,8 @@ async function fetchArticleAndRespond(
         interactionResponse.components = [{
             type: ComponentType.ActionRow,
             components: [{
-                type: ComponentType.SelectMenu,
-                custom_id: "wiki-search",
+                type: ComponentType.StringSelect,
+                custom_id: "wiki_search",
                 placeholder: "Select another article",
                 options: results[1].map((value, index) => ({
                     value: index.toString(),
@@ -139,7 +136,15 @@ export default function(
         const subcmd = interaction.data.options[0];
 
         let [searchTerm, subdomain] = ["", "en"];
+        if (subcmd.name === "wikipedia") {
+            subdomain = interaction.locale.split('-')[0];
+        }
         subcmd.options.forEach(opt => {
+            switch(opt.name) {
+                case "fandom_name": subdomain = opt.value; break;
+                case "search_term": searchTerm = opt.value; break;
+                case "language": subdomain = opt.value; break;
+            }
             if (opt.name === "fandom_name")
                 subdomain = opt.value;
             else if (opt.name === "search_term")

@@ -3,6 +3,7 @@
 import {
     ApplicationCommandOptionType,
     ApplicationCommandType,
+    Locale,
     RESTPostAPIApplicationCommandsJSONBody
 } from "discord-api-types/v10";
 
@@ -56,6 +57,18 @@ const commands: RESTPostAPIApplicationCommandsJSONBody[] = [
                         description: "Term to search for",
                         type: ApplicationCommandOptionType.String,
                         required: true
+                    },
+                    {
+                        name: "language",
+                        description: "Language to search in",
+                        type: ApplicationCommandOptionType.String,
+                        choices: Object.entries(Locale).map(
+                            ([lang_name, lang_code]) => ({
+                                name: lang_name,
+                                value: lang_code.split("-")[0]
+                            })
+                        ).slice(0, 25),
+                        required: false
                     }
                 ]
             }
