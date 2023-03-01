@@ -5,11 +5,14 @@ import {
     APIApplicationCommandInteractionDataSubcommandOption,
     APIChatInputApplicationCommandInteraction,
     APIChatInputApplicationCommandInteractionData,
-    APIInteraction, ApplicationCommandType, ComponentType, InteractionType,
+    APIInteraction, APIInteractionResponse,
+    APIMessageComponentSelectMenuInteraction,
+    APIMessageStringSelectInteractionData, ApplicationCommandType,
+    ComponentType, InteractionResponseType, InteractionType,
     RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
 import { Env } from "..";
-import { deferResponse, editInteractionResp, not_impl } from "../utils";
+import { deferResponse, editInteractionResp, jsonResponse, not_impl } from "../utils";
 
 interface SubcommandStructure extends APIApplicationCommandInteractionDataSubcommandOption {
     name: "fandom" | "wikipedia",
@@ -18,11 +21,21 @@ interface SubcommandStructure extends APIApplicationCommandInteractionDataSubcom
     })[]
 }
 
+interface CmdInterDataStructure extends
+APIChatInputApplicationCommandInteractionData {
+    options: [SubcommandStructure]
+}
+
 export interface WikiCommandInteraction extends APIChatInputApplicationCommandInteraction {
-    data: APIChatInputApplicationCommandInteractionData & {
-        options: [SubcommandStructure]  
-    }
+    data: CmdInterDataStructure
 };
+
+interface WikiComponentInteraction extends
+APIMessageComponentSelectMenuInteraction {
+    data: APIMessageStringSelectInteractionData & {
+        custom_id: "wiki_search"
+    }
+}
 
 /** API URLS of the wikis. */
 const WIKI_URLS = {
@@ -59,7 +72,6 @@ async function fetchArticleAndRespond(
     behaviourFlag: "fandom" | "wikipedia", appID: string,
     ctx: ExecutionContext, interactionToken: string
 ): Promise<Response> {
-    const cache = caches.default;
     const queryString = new URLSearchParams({
         action: "opensearch",
         search: searchTerm,
@@ -67,20 +79,15 @@ async function fetchArticleAndRespond(
     });
     const requestURL =
         `${WIKI_URLS[behaviourFlag](subdomain)}?${queryString.toString()}`;
-    let response = await cache.match(requestURL);
+    let response = await fetch(requestURL);
     const interactionResponse: RESTPatchAPIWebhookWithTokenMessageJSONBody = {};
-
-    if (! response) {
-        response = await fetch(requestURL);
-        if (! response.ok) {
-            interactionResponse.content =
-                "Error while fetching the article.\nAPI responded with "
-                + `**${response.status}**: **${response.statusText}**.`;
-            return await editInteractionResp(
-                appID, interactionToken, interactionResponse
-            );
-        }
-        ctx.waitUntil(cache.put(requestURL, response.clone()));
+    if (! response.ok) {
+        interactionResponse.content =
+            "Error while fetching the article.\nAPI responded with "
+            + `**${response.status}**: **${response.statusText}**.`;
+        return await editInteractionResp(
+            appID, interactionToken, interactionResponse
+        );
     }
 
     const results = await response.json<WikiResponse>();
@@ -93,7 +100,7 @@ async function fetchArticleAndRespond(
     }
 
     interactionResponse.content =
-        `Here's the search results for '${searchTerm}'.\n`
+        `Found this article for '${searchTerm}'.\n`
         + `Direct link: [Click here](${results[3][0]})`;
     if (results[1].length > 1)
         interactionResponse.components = [{
@@ -103,7 +110,7 @@ async function fetchArticleAndRespond(
                 custom_id: "wiki_search",
                 placeholder: "Select another article",
                 options: results[1].map((value, index) => ({
-                    value: index.toString(),
+                    value: results[3][index].split('/').pop()!,
                     label: value
                 }))
             }]
@@ -117,6 +124,13 @@ async function fetchArticleAndRespond(
 function isSlashCommandInt(interaction: APIInteraction): interaction is WikiCommandInteraction {
     return (
         (interaction.type === InteractionType.ApplicationCommand) && (interaction.data.type === ApplicationCommandType.ChatInput)
+    );
+}
+
+function isComponentInt(interaction: APIInteraction): interaction is WikiComponentInteraction {
+    return (
+        (interaction.type === InteractionType.MessageComponent) &&
+        (interaction.data.component_type === ComponentType.StringSelect)
     );
 }
 
@@ -157,6 +171,15 @@ export default function(
         ));
 
         return deferResponse();
+    } else if (isComponentInt(interaction)) {
+        const oldContent = interaction.message.content.split("/");
+        oldContent.pop();
+        return jsonResponse({
+            type: InteractionResponseType.UpdateMessage,
+            data: {
+                content: `${oldContent.join('/')}/${interaction.data.values[0]})`
+            }
+        } satisfies APIInteractionResponse);
     }
     return not_impl();
 }

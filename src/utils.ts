@@ -33,9 +33,9 @@ export const jsonResponse = (
  * To generate a json response for deferring interactions.
  * @returns An interaction response object.
  */
-export const deferResponse = () => jsonResponse(<APIInteractionResponse> {
+export const deferResponse = () => jsonResponse({
     type: InteractionResponseType.DeferredChannelMessageWithSource
-}, { headers: jsonHeaders });
+} satisfies APIInteractionResponse, { headers: jsonHeaders });
 
 /**
  * Convenience function to edit an interaction response (usually for deferred
