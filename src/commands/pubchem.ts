@@ -1,13 +1,12 @@
 `use strict`;
 
-import { isChatInputApplicationCommandInteraction } from "discord-api-types/utils/v10";
 import {
     APIActionRowComponent, APIApplicationCommandInteractionDataStringOption,
     APIButtonComponentWithCustomId, APIChatInputApplicationCommandInteraction,
     APIChatInputApplicationCommandInteractionData,
     APIEmbed, APIInteraction, APIMessageButtonInteractionData, APIMessageComponentInteraction, APIMessageStringSelectInteractionData, APISelectMenuComponent, APISelectMenuOption,
     ApplicationCommandType,
-    ButtonStyle, ComponentType, InteractionResponseType, InteractionType, RESTPatchAPIWebhookWithTokenMessageJSONBody
+    ButtonStyle, ComponentType, InteractionType, RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
 import { Env } from "..";
 import { deferResponse, editInteractionResp, not_impl } from "../utils";
