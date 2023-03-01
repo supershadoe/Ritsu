@@ -1,12 +1,11 @@
 `use strict`;
 
 import {
-    ApplicationCommandOptionType,
-    ApplicationCommandType,
-    Locale,
+    ApplicationCommandOptionType, ApplicationCommandType, Locale,
     RESTPostAPIApplicationCommandsJSONBody
 } from "discord-api-types/v10";
 
+/** List of commands to sync with Discord. */
 const commands = [
     {
         name: "pubchem",

@@ -12,11 +12,6 @@ export const jsonHeaders = {
 }
 
 /**
- *  A helper generic to generate optional types
- */
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-/**
  * Creates a Response object from JSON objects.
  *
  * Made just for convenience.
@@ -61,7 +56,7 @@ export const editInteractionResp = (
 /**
  * The default response sent for commands that don't have an implementation yet.
  *
- * @param _args The interaction object, env and ctx
+ * @param _args vararg to suck all arguments into the void.
  * @returns An ephemeral response object.
  */
 export const not_impl = (..._args: any): Response =>

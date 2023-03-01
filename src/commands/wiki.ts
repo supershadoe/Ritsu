@@ -4,9 +4,8 @@ import {
     APIApplicationCommandInteractionDataStringOption,
     APIApplicationCommandInteractionDataSubcommandOption,
     APIChatInputApplicationCommandInteraction,
-    APIChatInputApplicationCommandInteractionData,
-    APIInteraction, APIInteractionResponse,
-    APIMessageComponentSelectMenuInteraction,
+    APIChatInputApplicationCommandInteractionData, APIInteraction,
+    APIInteractionResponse, APIMessageComponentSelectMenuInteraction,
     APIMessageStringSelectInteractionData, ApplicationCommandType,
     ComponentType, InteractionResponseType, InteractionType,
     RESTPatchAPIWebhookWithTokenMessageJSONBody
@@ -14,36 +13,34 @@ import {
 import { Env } from "..";
 import { deferResponse, editInteractionResp, jsonResponse, not_impl } from "../utils";
 
-interface SubcommandStructure extends APIApplicationCommandInteractionDataSubcommandOption {
+/** Structure of the subcommand object sent in the slash command interaction. */
+interface SubcommandStructure extends
+APIApplicationCommandInteractionDataSubcommandOption {
     name: "fandom" | "wikipedia",
     options: (APIApplicationCommandInteractionDataStringOption & {
         name: "fandom_name" | "search_term" | "language"
     })[]
 }
 
+/** Structure of the data object in slash command interaction. */
 interface CmdInterDataStructure extends
 APIChatInputApplicationCommandInteractionData {
     options: [SubcommandStructure]
 }
 
-export interface WikiCommandInteraction extends APIChatInputApplicationCommandInteraction {
+/** Structure of the interaction object sent for a slash command. */
+interface WikiCommandInteraction extends
+APIChatInputApplicationCommandInteraction {
     data: CmdInterDataStructure
 };
 
+/** Structure of the interaction object sent for a message component. */
 interface WikiComponentInteraction extends
 APIMessageComponentSelectMenuInteraction {
     data: APIMessageStringSelectInteractionData & {
         custom_id: "wiki_search"
     }
 }
-
-/** API URLS of the wikis. */
-const WIKI_URLS = {
-    fandom: (fandom_name: string) =>
-        `https://${fandom_name}.fandom.com/api.php`,
-    wikipedia: (language: string) =>
-        `https://${language}.wikipedia.org/w/api.php`
-};
 
 /** A model of the response from MediaWiki opensearch. */
 interface WikiResponse {
@@ -58,10 +55,44 @@ interface WikiResponse {
 }
 
 /**
- * The primary command handler for `wiki {}` command which performs an
- * opensearch using MediaWiki API and responds to the interaction.
+ * Type guard to guarantee that the given interaction is of a slash command.
+ * 
+ * @param interaction The interaction object.
+ * @returns whether the given interaction is of a slash command.
+ */
+function isSlashCommandInt(interaction: APIInteraction): interaction is WikiCommandInteraction {
+    return (
+        (interaction.type === InteractionType.ApplicationCommand) && (interaction.data.type === ApplicationCommandType.ChatInput)
+    );
+}
+
+/**
+ * Type guard to guarantee that a given interaction is of a message component. 
+ *
+ * @param interaction The interaction object.
+ * @returns whether the given interaction is of a message component.
+ */
+function isComponentInt(interaction: APIInteraction): interaction is WikiComponentInteraction {
+    return (
+        (interaction.type === InteractionType.MessageComponent) &&
+        (interaction.data.component_type === ComponentType.StringSelect)
+    );
+}
+
+/** API URLS of the wikis. */
+const WIKI_URLS = {
+    fandom: (fandom_name: string) =>
+        `https://${fandom_name}.fandom.com/api.php`,
+    wikipedia: (language: string) =>
+        `https://${language}.wikipedia.org/w/api.php`
+};
+
+/**
+ * Performs an opensearch using MediaWiki API and responds to the interaction.
  *
  * @param searchTerm The search term to fetch the data for.
+ * @param subdomain To use a particular fandom/language for the search.
+ * @param behaviourFlag To use either fandom or wikipedia.
  * @param appID The application ID of the bot.
  * @param ctx The execution context to use for caching.
  * @param interactionToken The token for the current interaction to edit the
@@ -71,7 +102,7 @@ async function fetchArticleAndRespond(
     searchTerm: string, subdomain: string,
     behaviourFlag: "fandom" | "wikipedia", appID: string,
     ctx: ExecutionContext, interactionToken: string
-): Promise<Response> {
+) {
     const queryString = new URLSearchParams({
         action: "opensearch",
         search: searchTerm,
@@ -116,21 +147,8 @@ async function fetchArticleAndRespond(
             }]
         }];
 
-    return await editInteractionResp(
+    await editInteractionResp(
         appID, interactionToken, interactionResponse
-    );
-}
-
-function isSlashCommandInt(interaction: APIInteraction): interaction is WikiCommandInteraction {
-    return (
-        (interaction.type === InteractionType.ApplicationCommand) && (interaction.data.type === ApplicationCommandType.ChatInput)
-    );
-}
-
-function isComponentInt(interaction: APIInteraction): interaction is WikiComponentInteraction {
-    return (
-        (interaction.type === InteractionType.MessageComponent) &&
-        (interaction.data.component_type === ComponentType.StringSelect)
     );
 }
 
@@ -143,9 +161,8 @@ function isComponentInt(interaction: APIInteraction): interaction is WikiCompone
  * @returns A deferred response object to wait till data is fetched.
  */
 export default function(
-    interaction: APIInteraction,
-    env: Env, ctx: ExecutionContext
-): Response {
+    interaction: APIInteraction, env: Env, ctx: ExecutionContext
+) {
     if (isSlashCommandInt(interaction)) {
         const subcmd = interaction.data.options[0];
 

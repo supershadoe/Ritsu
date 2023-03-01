@@ -13,6 +13,10 @@ import {
 import { Env } from "..";
 import { deferResponse, editInteractionResp, jsonResponse, not_impl } from "../utils";
 
+/** Type of embed sent in response. */
+type ResponseEmbedT = Omit<APIEmbed, "image"> & Required<Pick<APIEmbed, "image">>
+
+/** Structure of the data object sent in interaction object. */
 interface CmdInterDataStructure extends
 APIChatInputApplicationCommandInteractionData {
     options: [Omit<APIApplicationCommandInteractionDataStringOption, "name"> & {
@@ -20,11 +24,13 @@ APIChatInputApplicationCommandInteractionData {
     }]
 }
 
+/** Structure of the interaction object for this slash command. */
 interface PubchemCommandInteraction extends
 APIChatInputApplicationCommandInteraction {
     data: CmdInterDataStructure
 }
 
+/** Structure of interaction object for component interactions. */
 interface PubchemComponentInteraction extends APIMessageComponentInteraction {
     data:
         Omit<APIMessageButtonInteractionData, "custom_id"> & {
@@ -32,23 +38,11 @@ interface PubchemComponentInteraction extends APIMessageComponentInteraction {
         } | Omit<APIMessageStringSelectInteractionData, "custom_id"> & {
             custom_id: "pubchem_searchResults"
         },
-    message: Omit<APIMessage, "embeds"> & {
-        embeds: [ResponseEmbedT]
+    message: Omit<APIMessage, "embeds" | "components"> & {
+        embeds: [ResponseEmbedT],
+        components: (APIActionRowComponent<APIStringSelectComponent> | APIActionRowComponent<APIButtonComponentWithCustomId>)[]
     }
 }
-
-type ResponseEmbedT = Omit<APIEmbed, "image"> & Required<Pick<APIEmbed, "image">>
-
-/** The basic URL of PubChem's site. */
-const PUBCHEM_URL = "https://pubchem.ncbi.nlm.nih.gov";
-
-/** The PUG REST API URL. */
-const PUG_API_URL = `${PUBCHEM_URL}/rest/pug`;
-
-/** The properties requested for a compound from PubChem. */
-const REQUIRED_PROPERTIES = [
-    "Title", "IUPACName", "MolecularFormula", "MolecularWeight", "Charge"
-];
 
 /** A model of the each compound received for proper typing. */
 interface CompoundProps {
@@ -56,11 +50,7 @@ interface CompoundProps {
         CID: number;
         /** Common name of that compound */
         Title: string;
-        /**
-         * IUPAC Name of that compound.
-         * 
-         * Field missing for stuff like phenyl
-         */
+        /** IUPAC Name of that compound (Field missing for stuff like phenyl) */
         IUPACName?: string;
         MolecularFormula: string;
         MolecularWeight: string;
@@ -76,23 +66,59 @@ interface PubchemError {
     }
 }
 
-const dimensionToggleButton = (dim_3d: boolean) => ({
+/**
+ * Type guard to guarantee that the given interaction is of a slash command.
+ * 
+ * @param interaction The interaction object.
+ * @returns whether the given interaction is of a slash command.
+ */
+function isSlashCommandInt(interaction: APIInteraction): interaction is PubchemCommandInteraction {
+    return (
+        (interaction.type === InteractionType.ApplicationCommand) && (interaction.data.type === ApplicationCommandType.ChatInput)
+    );
+}
+
+/**
+ * Type guard to guarantee that the given interaction is of a message component.
+ * 
+ * @param interaction The interaction object.
+ * @returns whether the given interaction is of a message component.
+ */
+function isComponentInt(interaction: APIInteraction): interaction is PubchemComponentInteraction {
+    return (interaction.type === InteractionType.MessageComponent);
+}
+
+/** The basic URL of PubChem's site. */
+const PUBCHEM_URL = "https://pubchem.ncbi.nlm.nih.gov";
+
+/** The PUG REST API URL. */
+const PUG_API_URL = `${PUBCHEM_URL}/rest/pug`;
+
+/** The properties requested for a compound from PubChem. */
+const REQUIRED_PROPERTIES = [
+    "Title", "IUPACName", "MolecularFormula", "MolecularWeight", "Charge"
+];
+
+/**
+ * Function to generate a toggle button based on required compound dimension.
+ * 
+ * @param dim_3d If toggle to change to 3D image should be shown.
+ * @returns An action row object with a toggle button.
+ */
+const dimensionToggleButton = (dim_3d: "2d" | "3d") => ({
     type: ComponentType.ActionRow,
     components: [{
         type: ComponentType.Button,
-        label: `Show ${dim_3d ? 3 : 2}D diagram`,
+        label: `Show ${dim_3d === "3d" ? '3' : '2'}D diagram`,
         style: ButtonStyle.Primary,
         custom_id: "pubchem_toggleDim"
     }]
-} satisfies APIActionRowComponent<APIButtonComponentWithCustomId>);
+}) satisfies APIActionRowComponent<APIButtonComponentWithCustomId>;
 
 /**
  * Embed generator for sending in response.
  *
- * @param propTable The property table returned by PubChem.
- * @param compound A future-proof param to generate embeds for
- * different compounds from the same propTable (switching between results of
- * the compound search).
+ * @param compound The compound to generate embed for.
  * @returns An array of embeds containing a single embed.
  */
 function generateEmbed(compound: CompoundProps) {
@@ -126,13 +152,10 @@ function generateEmbed(compound: CompoundProps) {
 /**
  * Message component generator to attach components to the message thats sent.
  *
- * @param compounds The propTable to generate the select menu from (to switch
- * between search results).
+ * @param compounds Array of compounds to use for select menu generation.
  * @returns An array of either a button alone or a button and a select menu.
  */
-function generateComponents(
-    compounds: CompoundProps[], dim_3d: boolean = false
-) {
+function generateComponents(compounds: CompoundProps[]) {
     const components = [];
 
     if (compounds.length > 1) {
@@ -151,25 +174,24 @@ function generateComponents(
         } satisfies APIActionRowComponent<APIStringSelectComponent>);
     }
 
-    components.push(dimensionToggleButton(dim_3d));
-
+    components.push(dimensionToggleButton("2d"));
     return components;
 }
 
 /**
- * The primary command handler for `pubchem` command which fetches results from
- * the API and responds to the interaction.
+ * Fetches results from the PubChem API and responds to the interaction.
  *
- * @param compoundName The name of the compound to search for.
  * @param appID The application ID of the bot.
  * @param ctx The execution context to use for caching.
  * @param interactionToken The token for the current interaction to edit the
  * deferred message.
+ * @param compoundName The name of the compound to search for.
+ * @param cid The CID to fetch the details for.
  */
 async function fetchDataAndRespond(
-    appID: string, ctx: ExecutionContext,
-    interactionToken: string, compoundName?: string, cid?: number
-): Promise<Response> {
+    appID: string, ctx: ExecutionContext, interactionToken: string,
+    compoundName?: string, cid?: number
+) {
     const cache = caches.default;
     const requestURL =
         `${PUG_API_URL}/compound/${cid ? "cid" : "name"}/${compoundName ?? cid}`
@@ -201,19 +223,9 @@ async function fetchDataAndRespond(
     interactionResponse.embeds = generateEmbed(compounds[0]);
     interactionResponse.components = generateComponents(compounds);
 
-    return await editInteractionResp(
+    await editInteractionResp(
         appID, interactionToken, interactionResponse
     );
-}
-
-function isSlashCommandInt(interaction: APIInteraction): interaction is PubchemCommandInteraction {
-    return (
-        (interaction.type === InteractionType.ApplicationCommand) && (interaction.data.type === ApplicationCommandType.ChatInput)
-    );
-}
-
-function isComponentInt(interaction: APIInteraction): interaction is PubchemComponentInteraction {
-    return (interaction.type === InteractionType.MessageComponent);
 }
 
 /**
@@ -242,11 +254,13 @@ export default function (
                 "record_type", (dim === "2d") ? "3d" : "2d"
             );
             embeds[0].image.url = imageURL.toString();
+
+            const components = interaction.message.components;
+            components.pop();
+            components.push(dimensionToggleButton(dim));
             return jsonResponse({
                 type: InteractionResponseType.UpdateMessage,
-                data: {
-                    embeds: embeds, components: generateComponents([], false)
-                }
+                data: {embeds, components}
             } satisfies APIInteractionResponse);
         } else {
             // idk if this works cuz idr what input gives multiple results
