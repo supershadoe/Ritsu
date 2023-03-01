@@ -1,38 +1,27 @@
 <a href="https://discord.com/api/oauth2/authorize?client_id=776112201734815786&scope=applications.commands"><img src="https://cdn.discordapp.com/avatars/776112201734815786/b2b1856e81f0b0a1607756a76d1a3851.webp" alt="Bot logo" align="right"/></a>
 
 # Ritsu
-**A discord bot to fetch information from various API**
+**An always-online Discord bot to fetch information from various API**
 
-<a href="https://apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="License: Apache" align="right" /></a>
-<a href="https://canary.discord.com/api/oauth2/authorize?client_id=776112201734815786&permissions=0&scope=bot%20applications.commands"><img src="https://img.shields.io/badge/Bot%20Invite-Link-blue" alt="Bot invite link" align="right" /></a>
-
-<img src="https://img.shields.io/badge/Python-3.10+-green" alt="Python >=3.10" align="left" />
-<hr />
-
-## Note
-The bot isn't maintained on a regular basis and also in a very alpha stage so
-code that works today may not work tomorrow.
-
-## How to run this bot
-1. Clone this repository
-2. Add your bot's token to an environment variable called `BOT_TOKEN_PROD`
-3. Also, setup a virtualenv and install dependencies from `requirements.txt`
-4. Run `python -m ritsu`
+## Info
+- 📄 Licensed under Apache-2.0
+- ⚙️ Requires TypeScript 4.9 or 4.9+ (particularly due to use of `satisfies` operator)
+- ⚙️ Uses ES modules and not CJS
+- 🚀 Minimal amount of dependencies
+- 🔶 Powered by [Cloudflare Workers](https://workers.cloudflare.com)
+- 🔗 [Bot Invite Link](https://discord.com/api/oauth2/authorize?client_id=776112201734815786&permissions=0&scope=bot%20applications.commands)
 
 ## Features
-- Fetching the details of a compound from PubChem using their PUG API
-- Fetching release schedule of SubsPlease using their API
-- More to come
+- Searching and fetching articles from Wikipedia.
+- Searching and fetching articles from various fandom pages.
+- Searching and fetching the details of a compound from PubChem using their PUG API.
 
-(very niche stuff ik)
-
-## FAQ
-### Why aren't you using a RESTBot?
-Because I can't get a domain name right now to add to discord as interaction
-server.
-### Will there be more features coming up?
-Yeah, but not soon. Can't promise when or what.
-### Why is the code Python (>=3.10)?
-Because it would be annoying to use `typing.Union[T1, T2]` instead of
-`T1 | T2`.
-
+## How to run this bot
+1. Install `node.js` and `npm`.
+2. Clone this repository: `git clone https://github.com/supershadoe/ritsu`.
+3. Create a worker in Cloudflare's [dashboard](https://dash.cloudflare.com).
+4. Run `npm update` to download all node modules.
+5. Set your worker's name and domain/routes in `wrangler.toml`.
+6. Login to your Cloudflare account using wrangler: `npx wrangler login`.
+7. Run a locally hosted bot for development purposes using `npx wrangler dev` additionally with `--local` if you want to just use miniflare and not connect to a Cloudflare server for using KV and durable objects (this bot doesn't need those right now).
+8. Upload the code to run serverlessly on any cloudflare datacenter using `npx wrangler publish`.
