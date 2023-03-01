@@ -4,31 +4,40 @@ import {
     APIActionRowComponent, APIApplicationCommandInteractionDataStringOption,
     APIButtonComponentWithCustomId, APIChatInputApplicationCommandInteraction,
     APIChatInputApplicationCommandInteractionData, APIEmbed, APIInteraction,
-    APIMessageButtonInteractionData, APIMessageComponentInteraction,
-    APIMessageStringSelectInteractionData, APISelectMenuOption,
-    APIStringSelectComponent, ApplicationCommandType, ButtonStyle,
-    ComponentType, InteractionType, RESTPatchAPIWebhookWithTokenMessageJSONBody
+    APIInteractionResponse, APIMessage, APIMessageButtonInteractionData,
+    APIMessageComponentInteraction, APIMessageStringSelectInteractionData,
+    APISelectMenuOption, APIStringSelectComponent, ApplicationCommandType,
+    ButtonStyle, ComponentType, InteractionResponseType, InteractionType,
+    RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
 import { Env } from "..";
-import { deferResponse, editInteractionResp, not_impl } from "../utils";
+import { deferResponse, editInteractionResp, jsonResponse, not_impl } from "../utils";
 
-export interface PubchemCommandInteraction extends APIChatInputApplicationCommandInteraction {
-    data: APIChatInputApplicationCommandInteractionData & {
-        options: [
-            APIApplicationCommandInteractionDataStringOption & {
-                name: "compound_name"
-            }
-        ]
+interface CmdInterDataStructure extends
+APIChatInputApplicationCommandInteractionData {
+    options: [Omit<APIApplicationCommandInteractionDataStringOption, "name"> & {
+        name: "compound_name"
+    }]
+}
+
+interface PubchemCommandInteraction extends
+APIChatInputApplicationCommandInteraction {
+    data: CmdInterDataStructure
+}
+
+interface PubchemComponentInteraction extends APIMessageComponentInteraction {
+    data:
+        Omit<APIMessageButtonInteractionData, "custom_id"> & {
+            custom_id: "pubchem_toggleDim"
+        } | Omit<APIMessageStringSelectInteractionData, "custom_id"> & {
+            custom_id: "pubchem_searchResults"
+        },
+    message: Omit<APIMessage, "embeds"> & {
+        embeds: [ResponseEmbedT]
     }
 }
 
-export interface PubchemComponentInteraction extends
-APIMessageComponentInteraction {
-    data:
-        APIMessageButtonInteractionData | APIMessageStringSelectInteractionData & {
-            custom_id: "pubchem_toggleDim" | "pubchem_searchResults"
-        }
-}
+type ResponseEmbedT = Omit<APIEmbed, "image"> & Required<Pick<APIEmbed, "image">>
 
 /** The basic URL of PubChem's site. */
 const PUBCHEM_URL = "https://pubchem.ncbi.nlm.nih.gov";
@@ -67,6 +76,16 @@ interface PubchemError {
     }
 }
 
+const dimensionToggleButton = (dim_3d: boolean) => ({
+    type: ComponentType.ActionRow,
+    components: [{
+        type: ComponentType.Button,
+        label: `Show ${dim_3d ? 3 : 2}D diagram`,
+        style: ButtonStyle.Primary,
+        custom_id: "pubchem_toggleDim"
+    }]
+} satisfies APIActionRowComponent<APIButtonComponentWithCustomId>);
+
 /**
  * Embed generator for sending in response.
  *
@@ -76,32 +95,29 @@ interface PubchemError {
  * the compound search).
  * @returns An array of embeds containing a single embed.
  */
-function generateEmbeds(
-    compounds: CompoundProps[], compound: number = 0
-): [APIEmbed] {
-    const firstCompound = compounds[compound];
-    const imageURL = `${PUG_API_URL}/compound/cid/${firstCompound.CID}/PNG`;
+function generateEmbed(compound: CompoundProps) {
+    const imageURL = `${PUG_API_URL}/compound/cid/${compound.CID}/PNG`;
     const embed = {
-        title: firstCompound.Title,
+        title: compound.Title,
         color: 0xF6CEE7,
         thumbnail: { url: `${imageURL}?record_type=3d&image_size=small` },
         fields: [
-            {name: "Molecular Formula", value: firstCompound.MolecularFormula},
-            {name: "Molecular Weight", value: firstCompound.MolecularWeight},
+            {name: "Molecular Formula", value: compound.MolecularFormula},
+            {name: "Molecular Weight", value: compound.MolecularWeight},
         ],
         footer: {
             text: "Fetched from PubChem", icon_url: `${PUBCHEM_URL}/favicon.ico`
         },
         image: { url: `${imageURL}?record_type=2d` },
-        url: `${PUBCHEM_URL}/compound/${firstCompound.CID}`
-    } satisfies APIEmbed;
-    if (firstCompound.IUPACName)
+        url: `${PUBCHEM_URL}/compound/${compound.CID}`
+    } satisfies ResponseEmbedT;
+    if (compound.IUPACName)
         embed.fields.push({
-            name: "IUPAC Name", value: firstCompound.IUPACName
+            name: "IUPAC Name", value: compound.IUPACName
         });
-    if (firstCompound.Charge)
+    if (compound.Charge)
         embed.fields.push({
-            name: "Charge", value: firstCompound.Charge.toString()
+            name: "Charge", value: compound.Charge.toString()
         });
 
     return [embed]
@@ -114,7 +130,9 @@ function generateEmbeds(
  * between search results).
  * @returns An array of either a button alone or a button and a select menu.
  */
-function generateComponents(compounds: CompoundProps[]) {
+function generateComponents(
+    compounds: CompoundProps[], dim_3d: boolean = false
+) {
     const components = [];
 
     if (compounds.length > 1) {
@@ -133,15 +151,7 @@ function generateComponents(compounds: CompoundProps[]) {
         } satisfies APIActionRowComponent<APIStringSelectComponent>);
     }
 
-    components.push({
-        type: ComponentType.ActionRow,
-        components: [{
-            type: ComponentType.Button,
-            label: "Flatten Structure",
-            style: ButtonStyle.Primary,
-            custom_id: "pubchem_toggleDim"
-        }]
-    } satisfies APIActionRowComponent<APIButtonComponentWithCustomId>);
+    components.push(dimensionToggleButton(dim_3d));
 
     return components;
 }
@@ -157,13 +167,13 @@ function generateComponents(compounds: CompoundProps[]) {
  * deferred message.
  */
 async function fetchDataAndRespond(
-    compoundName: string, appID: string, ctx: ExecutionContext,
-    interactionToken: string
+    appID: string, ctx: ExecutionContext,
+    interactionToken: string, compoundName?: string, cid?: number
 ): Promise<Response> {
     const cache = caches.default;
     const requestURL =
-        `${PUG_API_URL}/compound/name/${compoundName}/property`
-        + `/${REQUIRED_PROPERTIES.join()}/JSON`;
+        `${PUG_API_URL}/compound/${cid ? "cid" : "name"}/${compoundName ?? cid}`
+        + `/property/${REQUIRED_PROPERTIES.join()}/JSON`;
     let response = await cache.match(requestURL);
     const interactionResponse: RESTPatchAPIWebhookWithTokenMessageJSONBody = {};
 
@@ -185,11 +195,10 @@ async function fetchDataAndRespond(
 
     type RespT = { PropertyTable: { Properties: CompoundProps[] } };
     const compounds = (await response.json<RespT>()).PropertyTable.Properties;
-    console.log(JSON.stringify(compounds))
 
     interactionResponse.content =
         `Here's the data found for '${compoundName}'.`;
-    interactionResponse.embeds = generateEmbeds(compounds);
+    interactionResponse.embeds = generateEmbed(compounds[0]);
     interactionResponse.components = generateComponents(compounds);
 
     return await editInteractionResp(
@@ -201,6 +210,10 @@ function isSlashCommandInt(interaction: APIInteraction): interaction is PubchemC
     return (
         (interaction.type === InteractionType.ApplicationCommand) && (interaction.data.type === ApplicationCommandType.ChatInput)
     );
+}
+
+function isComponentInt(interaction: APIInteraction): interaction is PubchemComponentInteraction {
+    return (interaction.type === InteractionType.MessageComponent);
 }
 
 /**
@@ -216,9 +229,35 @@ export default function (
 ): Response {
     if (isSlashCommandInt(interaction)) {
         ctx.waitUntil(fetchDataAndRespond(
-            interaction.data.options[0].value, env.RITSU_APP_ID, ctx, interaction.token
+            env.RITSU_APP_ID, ctx, interaction.token,
+            interaction.data.options[0].value
         ));
         return deferResponse();
+    } else if (isComponentInt(interaction)) {
+        if (interaction.data.custom_id === "pubchem_toggleDim") {
+            const embeds = interaction.message.embeds;
+            const imageURL = new URL(embeds[0].image.url);
+            const dim = imageURL.searchParams.get("record_type") as "2d" | "3d";
+            imageURL.searchParams.set(
+                "record_type", (dim === "2d") ? "3d" : "2d"
+            );
+            embeds[0].image.url = imageURL.toString();
+            return jsonResponse({
+                type: InteractionResponseType.UpdateMessage,
+                data: {
+                    embeds: embeds, components: generateComponents([], false)
+                }
+            } satisfies APIInteractionResponse);
+        } else {
+            // idk if this works cuz idr what input gives multiple results
+            ctx.waitUntil(fetchDataAndRespond(
+                env.RITSU_APP_ID, ctx, interaction.token, undefined,
+                parseInt(interaction.data.values[0])
+            ));
+            return jsonResponse({
+                type: InteractionResponseType.DeferredMessageUpdate
+            });
+        }
     }
     return not_impl();
 }
