@@ -67,3 +67,16 @@ jsonResponse(<APIInteractionResponse> {
          flags: MessageFlags.Ephemeral
      }
 });
+
+/**
+ * Sends an error message in response to an interaction.
+ * 
+ * @param error Object to send as error.
+ * @returns An interaction response object.
+ */
+export const generateErrorResp = (
+    errorObj: Record<string, any> & { ritsu_error: string}
+) => ({
+    content: errorObj.ritsu_error,
+    embeds: [{description: "```js\n" + JSON.stringify(errorObj) + "\n```" }]
+}) satisfies RESTPatchAPIWebhookWithTokenMessageJSONBody;
