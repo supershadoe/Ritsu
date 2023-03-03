@@ -16,9 +16,8 @@ import { checkForSigAndTS, verifySig } from "./verifyInter";
  export interface Env {
     RITSU_APP_PUB_KEY: string;
     RITSU_APP_ID: string;
-    RITSU_CLIENT_SECRET: string;
-
-    TRUSTED_LOCAL_ENV: string | undefined;
+    RITSU_CLIENT_SECRET?: string;
+    TRUSTED_LOCAL_ENV?: string;
 };
 
 /** The type of arguments streamed to and fro each function in this code. */
