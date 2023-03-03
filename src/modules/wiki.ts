@@ -5,13 +5,16 @@ import {
     APIApplicationCommandInteractionDataSubcommandOption,
     APIChatInputApplicationCommandInteraction,
     APIChatInputApplicationCommandInteractionData, APIEmbed, APIInteraction,
-    APIInteractionResponse, APIMessage, APIMessageComponentSelectMenuInteraction,
+    APIInteractionResponse, APIMessage,
+    APIMessageComponentSelectMenuInteraction,
     APIMessageStringSelectInteractionData, ApplicationCommandType,
     ComponentType, InteractionResponseType, InteractionType,
     RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
 import { Env } from "..";
-import { deferResponse, editInteractionResp, generateErrorResp, jsonResponse, not_impl } from "../utils";
+import {
+    deferResponse, editInteractionResp, jsonHeaders, jsonResponse, not_impl
+} from "../utils";
 
 /** Type of embed sent in response */
 type ResponseEmbedT = Omit<APIEmbed, "image" | "url"> & Required<Pick<APIEmbed, "image" | "url">>
@@ -43,8 +46,7 @@ APIMessageComponentSelectMenuInteraction {
     data: APIMessageStringSelectInteractionData & {
         custom_id: "wiki_search"
     },
-    message: Omit<APIMessage, "embeds" | "content"> & {
-        content: string, 
+    message: Omit<APIMessage, "embeds"> & {
         embeds: [ResponseEmbedT]
     }
 }
@@ -98,7 +100,7 @@ interface ExtractsResponse {
  * @returns whether the given interaction is of a slash command.
  */
 function isSlashCommandInt(interaction: APIInteraction):
-    interaction is WikiCommandInteraction {
+interaction is WikiCommandInteraction {
     return (
         (interaction.type === InteractionType.ApplicationCommand) && (interaction.data.type === ApplicationCommandType.ChatInput)
     );
@@ -111,7 +113,7 @@ function isSlashCommandInt(interaction: APIInteraction):
  * @returns whether the given interaction is of a message component.
  */
 function isComponentInt(interaction: APIInteraction): 
-    interaction is WikiComponentInteraction {
+interaction is WikiComponentInteraction {
     return (
         (interaction.type === InteractionType.MessageComponent) &&
         (interaction.data.component_type === ComponentType.StringSelect)
@@ -127,14 +129,17 @@ const WIKI_URLS = {
 };
 
 /**
- * Perform a prefix search on the wiki pages using the API and return the
- * results.
+ * Perform a prefix search on the wiki pages using the API and adds to the
+ * response object if the data can be fetched.
  * 
  * @param searchTerm The string to search for.
  * @param requestURL The URL to send the request to.
- * @returns Search results object if any response is received.
+ * @param responseObj The response object to add data to.
  */
-async function mediaWikiPrefixSearch(searchTerm: string, requestURL: URL) {
+async function mediaWikiPrefixSearch(
+    searchTerm: string, requestURL: URL,
+    responseObj: RESTPatchAPIWebhookWithTokenMessageJSONBody
+) {
     requestURL.search = "";
     Object.entries({
         action: "query",
@@ -144,63 +149,83 @@ async function mediaWikiPrefixSearch(searchTerm: string, requestURL: URL) {
         format: "json"
     }).forEach(query => requestURL.searchParams.set(...query));
     const response = await fetch(requestURL);
+
+    if (! response.ok)
+        throw new Error(
+            "Failed to perform the prefixsearch: "
+            + `**${response.status} __${response.statusText}.__**`
+        );
+
+    const results =
+        (await response.json<PrefixSearchResponse>()).query.prefixsearch;
+    responseObj.content = 
+        results.length > 0
+        ? `Found this article for ${searchTerm}.\n`
+        : `No articles found for ${searchTerm}`;
+    if (results.length > 1)
+        responseObj.components = [{
+            type: ComponentType.ActionRow,
+            components: [{
+                type: ComponentType.StringSelect,
+                custom_id: "wiki_search",
+                placeholder: "Select another article",
+                options: results.map(result => ({
+                    value: result.pageid.toString(),
+                    label: result.title,
+                    description: result.pageid.toString()
+                }))
+            }]
+        }];
+
     return (
-        response.ok
-        ? (await response.json<PrefixSearchResponse>()).query.prefixsearch
-        : {
-            "ritsu_error": "Failed to perform the prefixsearch.",
-            "status_code": response.status,
-            "status_text": response.statusText
-        }
+        results.length > 0
+        ? results[0].pageid
+        : 0
     );
 }
 
 /**
- * Fetches the introductory part and thumbnail of an article from wikipedia.
+ * Fetches the introductory part and thumbnail of an article from wikipedia
+ * and generates an embed if data can be fetched.
  * 
  * @param pageid Unique ID of the article.
  * @param requestURL The URL to send the request to.
- * @returns The result object if the response is ok.
+ * @param responseObj The response object to add data to.
  */
-async function wikipediaExtracts(pageid: string, requestURL: URL) {
+async function wikipediaExtracts(
+    pageid: string, requestURL: URL,
+    responseObj: RESTPatchAPIWebhookWithTokenMessageJSONBody
+) {
+    const directLink = `${requestURL.origin}/?curid=${pageid}`;
     requestURL.search = "";
     Object.entries({
         action: "query",
         prop: "extracts|pageimages",
         piprop: "thumbnail",
         pithumbsize: "100",
+        pilicense: "any",
         pageids: pageid,
+        exchars: "1200",
         exintro: "true",
         explaintext: "true",
         format: "json"
     }).forEach(query => requestURL.searchParams.set(...query));
     const response = await fetch(requestURL);
-    return (
-        response.ok
-        ? (await response.json<ExtractsResponse>()).query.pages[pageid]
-        : {
-            "ritsu_error": "Failed to extract text from the article.",
-            "status_code": response.status,
-            "status_text": response.statusText
-        }
-    );
-}
 
-/**
- * Generates an embed if the command is for Wikipedia search.
- * 
- * @param article An article fetched from Wikipedia.
- * @returns An array (of length 1) of embed to send to Discord.
- */
-function generateWikipediaEmbed(
-    article: ExtractsResponse["query"]["pages"][string], articleLink: string
-) {
-    return [{
+    if (! response.ok)
+        throw new Error(
+            "Failed to extract data from the article: "
+            + `**${response.status} __${response.statusText}.__**`
+        );
+
+    const article = 
+        (await response.json<ExtractsResponse>()).query.pages[pageid];
+    responseObj.embeds = [{
         title: article.title,
         description: article.extract,
         color: 0xF6CEE7,
         image: { url: article.thumbnail.source },
-        url: articleLink
+        url: directLink
     } satisfies APIEmbed];
 }
 
@@ -217,73 +242,63 @@ function generateWikipediaEmbed(
 async function fetchArticleAndRespond(
     searchTerm: string, subdomain: string,
     behaviourFlag: keyof typeof WIKI_URLS, appID: string,
-    interactionToken: string, pageid?: string
+    interactionToken: string
 ) {
-    let firstLink: string;
-    let article: Awaited<ReturnType<typeof wikipediaExtracts>> | null;
-    const requestURL = new URL(WIKI_URLS[behaviourFlag](subdomain));
-    const interactionResponse: RESTPatchAPIWebhookWithTokenMessageJSONBody = {};
+    try {
+        const requestURL = new URL(WIKI_URLS[behaviourFlag](subdomain));
+        const interactionResponse = {
+            } as RESTPatchAPIWebhookWithTokenMessageJSONBody;
+        const pageid = await mediaWikiPrefixSearch(
+            searchTerm, requestURL, interactionResponse
+        );
 
-    if (pageid) {
-        firstLink = `${requestURL.origin}/?curid=${pageid})`;
-        article = await wikipediaExtracts(pageid, requestURL);
-    } else {
-        const results = await mediaWikiPrefixSearch(searchTerm, requestURL);
-        if ("ritsu_error" in results)
-            return await editInteractionResp(
-                appID, interactionToken, generateErrorResp(results)
-            );
+        if (behaviourFlag === "wikipedia" && pageid) {
+            if (pageid)
+                await wikipediaExtracts(
+                    pageid.toString(), requestURL, interactionResponse
+                );
+        } else
+            interactionResponse.content +=
+                `${requestURL.origin}/?curid=${pageid}`;
 
-        if (results.length < 1) {
-            interactionResponse.content =
-                `No search results found for ${searchTerm}`;
-            return await editInteractionResp(
-                appID, interactionToken, interactionResponse
-            );
-        }
-
-        interactionResponse.content = `Found this article for '${searchTerm}'.`;
-        firstLink = `${requestURL.origin}/?curid=${results[0].pageid})`;
-
-        if (behaviourFlag === "wikipedia")
-            article = await wikipediaExtracts(
-                results[0].pageid.toString(), requestURL
-            );
-        else
-            article = null;
-
-        if (results.length > 1)
-        interactionResponse.components = [{
-            type: ComponentType.ActionRow,
-            components: [{
-                type: ComponentType.StringSelect,
-                custom_id: "wiki_search",
-                placeholder: "Select another article",
-                options: results.map(result => ({
-                    value: result.pageid.toString(),
-                    label: result.title
-                }))
-            }]
-        }];
+        await editInteractionResp(
+            appID, interactionToken, interactionResponse
+        );
+    } catch(e) {
+        return editInteractionResp(
+            appID, interactionToken, { content: (e as Error).message }
+        );
     }
+}
 
-    const directLink = `Direct link: [Click here](${firstLink})`;
-
-    if (article) {
-        if ("ritsu_error" in article) {
-            interactionResponse.content += directLink;
-        } else {
-            interactionResponse.embeds = generateWikipediaEmbed(
-                article, firstLink
-            );
-        }
-    } else {
-        interactionResponse.content += directLink;
+/**
+ * Changes the embed on selecting another search result from the string select
+ * menu.
+ *
+ * @param interaction For obtaining necessary information from the context.
+ * @param pageid To fetch details of the selected article.
+ */
+async function switchWikipediaEmbed(
+    interaction: WikiComponentInteraction, pageid: string
+) {
+    const url = new URL(interaction.message.embeds[0].url)
+    url.pathname = "/w/api.php";
+    url.search = "";
+    const response:
+        RESTPatchAPIWebhookWithTokenMessageJSONBody = {};
+    response.content = interaction.message.content.split("\n").shift();
+    try {
+        await wikipediaExtracts(pageid, url, response);
+        return await editInteractionResp(
+            interaction.application_id, interaction.token, response
+        );
+    } catch(e) {
+        response.content +=
+            `\n\nError while switching links: ${(e as Error).message}`;
+        return await editInteractionResp(
+            interaction.application_id, interaction.token, response
+        );
     }
-
-    await editInteractionResp(
-        appID, interactionToken, interactionResponse
-    );
 }
 
 /**
@@ -323,53 +338,23 @@ export default function(
 
         return deferResponse();
     } else if (isComponentInt(interaction)) {
-        // TODO change logic for wikipedia
         const pageid = interaction.data.values[0];
-        if (interaction.message.interaction?.name === "wiki wikipedia") {
-            ctx.waitUntil(fetchArticleAndRespond(
-                "", 
-            ))
-            ctx.waitUntil(async function() {
-                const oldContent = interaction.message.content.split("\n");
-                if (oldContent.length > 1) oldContent.pop();
-                let content = oldContent.join("\n");
-                let embeds: APIEmbed[];
-                let requestURL: URL;
-                if (interaction.message.embeds.length > 0) {
-                    requestURL = new URL(interaction.message.embeds[0].url);
-                } else {
-                    requestURL = new URL(
-                        interaction.message.content.split("k](").pop()
-                        ?? WIKI_URLS["wikipedia"]("en")
-                    );
-                }
-                const replaceLink = `${requestURL.origin}/?curid=${pageid})`;
-                const article = await wikipediaExtracts(
-                    interaction.data.values[0], requestURL
-                );
-                if (("ritsu_error" in article)) {
-                    content += `\n[Direct Link](${replaceLink})`;
-                } else {
-                    embeds = generateWikipediaEmbed(
-                        article, replaceLink
-                    );
-                }
+        switch(interaction.message.interaction?.name) {
+            case "wiki fandom":
+                const oldContent = interaction.message.content.split("=");
+                oldContent.pop();
                 return jsonResponse({
-                    type: InteractionResponseType
-                })
-            }());
-            return jsonResponse({
-                type: InteractionResponseType.DeferredMessageUpdate
-            } satisfies APIInteractionResponse);
+                    type: InteractionResponseType.UpdateMessage,
+                    data: {
+                        content: `${oldContent.join('=')}=${interaction.data.values[0]}`
+                    }
+                } satisfies APIInteractionResponse);
+            case "wiki wikipedia":
+                ctx.waitUntil(switchWikipediaEmbed(interaction, pageid));
+                return jsonResponse({
+                    type: InteractionResponseType.DeferredMessageUpdate
+                } satisfies APIInteractionResponse);
         }
-        const oldContent = interaction.message.content.split("=");
-        oldContent.pop();
-        return jsonResponse({
-            type: InteractionResponseType.UpdateMessage,
-            data: {
-                content: `${oldContent.join('=')}=${interaction.data.values[0]})`
-            }
-        } satisfies APIInteractionResponse);
     }
     return not_impl();
 }
