@@ -17,7 +17,7 @@ import {
 } from "../utils";
 
 /** Type of embed sent in response */
-type ResponseEmbedT = Omit<APIEmbed, "image" | "url"> & Required<Pick<APIEmbed, "image" | "url">>
+type ResponseEmbedT = Omit<APIEmbed, "url"> & Required<Pick<APIEmbed, "url">>
 
 /** Structure of the subcommand object sent in the slash command interaction. */
 interface SubcommandStructure extends
@@ -84,7 +84,7 @@ interface ExtractsResponse {
             /** Extract of the intro of the article */
             extract: string,
             /** Thumbnail of the article */
-            thumbnail: {
+            thumbnail?: {
                 source: string,
                 width: number,
                 height: number
@@ -224,9 +224,10 @@ async function wikipediaExtracts(
         title: article.title,
         description: article.extract,
         color: 0xF6CEE7,
-        image: { url: article.thumbnail.source },
         url: directLink
     } satisfies APIEmbed];
+    if (article.thumbnail)
+        responseObj.embeds[0].image = { url : article.thumbnail.source };
 }
 
 /**
