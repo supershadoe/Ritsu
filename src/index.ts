@@ -4,8 +4,8 @@ import {
     APIInteraction, InteractionType, InteractionResponseType
 } from "discord-api-types/v10";
 import { syncCommands } from "./commandSync"
-import pubchem from "./commands/pubchem";
-import wiki from "./commands/wiki";
+import pubchem from "./modules/pubchem";
+import wiki from "./modules/wiki";
 import { jsonResponse } from "./utils";
 import { checkForSigAndTS, verifySig } from "./verifyInter";
 

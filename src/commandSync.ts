@@ -2,7 +2,7 @@
 
 import { RouteBases, Routes } from "discord-api-types/v10";
 import { Env } from ".";
-import commands from "./commands";
+import commands from "./modules";
 import { jsonHeaders, jsonResponse } from "./utils";
 
 /**
