@@ -10,8 +10,8 @@ import {
     ButtonStyle, ComponentType, InteractionResponseType, InteractionType,
     RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
-import { Env } from "..";
-import { deferResponse, editInteractionResp, jsonResponse, not_impl } from "../utils";
+import { Env } from "../index.js";
+import { deferResponse, editInteractionResp, jsonResponse, not_impl } from "../utils.js";
 
 /** Type of embed sent in response. */
 type ResponseEmbedT = Omit<APIEmbed, "image"> & Required<Pick<APIEmbed, "image">>

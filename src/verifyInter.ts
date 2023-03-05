@@ -1,7 +1,7 @@
 `use strict`;
 /* Adopted from https://gist.github.com/devsnek/77275f6e3f810a9545440931ed314dc1 */
 
-import { Env } from ".";
+import { Env } from "./index.js";
 
 const VERIFY_ALGO = "NODE-ED25519";
 

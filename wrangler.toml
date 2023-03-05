@@ -1,5 +1,6 @@
 name = "ritsu"
 main = "src/index.ts"
+minify = true
 route = { pattern = "ritsu.shadoe.codes", custom_domain = true }
 workers_dev = false
 compatibility_date = "2023-03-01"

@@ -7,3 +7,12 @@ node_modules
 
 # Ignore local env vars that apply only to `wrangler dev`
 .dev.vars
+
+# Ignore DS_STORE on macs
+.DS_Store
+
+# Random files that may be generated (copied from workers template)
+*-lock.*
+*.lock
+*.log
+/dist

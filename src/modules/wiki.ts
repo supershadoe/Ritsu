@@ -11,10 +11,10 @@ import {
     ComponentType, InteractionResponseType, InteractionType,
     RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/v10";
-import { Env } from "..";
+import { Env } from "../index.js";
 import {
     deferResponse, editInteractionResp, jsonHeaders, jsonResponse, not_impl
-} from "../utils";
+} from "../utils.js";
 
 /** Type of embed sent in response */
 type ResponseEmbedT = Omit<APIEmbed, "url"> & Required<Pick<APIEmbed, "url">>

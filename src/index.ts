@@ -3,11 +3,11 @@
 import {
     APIInteraction, InteractionType, InteractionResponseType
 } from "discord-api-types/v10";
-import { syncCommands } from "./commandSync"
-import pubchem from "./modules/pubchem";
-import wiki from "./modules/wiki";
-import { jsonResponse } from "./utils";
-import { checkForSigAndTS, verifySig } from "./verifyInter";
+import { syncCommands } from "./commandSync.js"
+import pubchem from "./modules/pubchem.js";
+import wiki from "./modules/wiki.js";
+import { jsonResponse } from "./utils.js";
+import { checkForSigAndTS, verifySig } from "./verifyInter.js";
 
 /** 
  * A typed object to describe the data in the environment of workers

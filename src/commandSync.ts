@@ -1,9 +1,9 @@
 `use strict`;
 
 import { RouteBases, Routes } from "discord-api-types/v10";
-import { Env } from ".";
-import commands from "./modules";
-import { jsonHeaders, jsonResponse } from "./utils";
+import { Env } from "./index.js";
+import commands from "./modules/index.js";
+import { jsonHeaders, jsonResponse } from "./utils.js";
 
 /**
  * The structure of a client credential access token response sent by Discord
