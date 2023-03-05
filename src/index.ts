@@ -2,7 +2,7 @@
 
 import {
     APIInteraction, InteractionType, InteractionResponseType
-} from "discord-api-types/v10";
+} from "discord-api-types/payloads/v10";
 import { syncCommands } from "./commandSync.js"
 import pubchem from "./modules/pubchem.js";
 import wiki from "./modules/wiki.js";

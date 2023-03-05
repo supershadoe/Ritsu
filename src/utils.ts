@@ -1,10 +1,11 @@
 `use strict`;
 
 import {
-    APIInteractionResponse, InteractionResponseType, MessageFlags,
-    RESTPatchAPIWebhookWithTokenMessageJSONBody,
-    RouteBases, Routes
-} from "discord-api-types/v10";
+    APIInteractionResponse, InteractionResponseType, MessageFlags
+} from "discord-api-types/payloads/v10";
+import {
+    RESTPatchAPIWebhookWithTokenMessageJSONBody, RouteBases, Routes
+} from "discord-api-types/rest/v10";
 
 /** Content-Type header for response with JSON body. */
 export const jsonHeaders = {

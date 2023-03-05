@@ -1,9 +1,11 @@
 `use strict`;
 
 import {
-    ApplicationCommandOptionType, ApplicationCommandType, Locale,
-    RESTPostAPIApplicationCommandsJSONBody
-} from "discord-api-types/v10";
+    ApplicationCommandOptionType, ApplicationCommandType
+} from "discord-api-types/payloads/v10";
+import {
+    Locale, RESTPostAPIApplicationCommandsJSONBody
+} from "discord-api-types/rest/v10";
 
 /** List of commands to sync with Discord. */
 const commands = [

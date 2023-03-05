@@ -7,9 +7,11 @@ import {
     APIInteractionResponse, APIMessage, APIMessageButtonInteractionData,
     APIMessageComponentInteraction, APIMessageStringSelectInteractionData,
     APISelectMenuOption, APIStringSelectComponent, ApplicationCommandType,
-    ButtonStyle, ComponentType, InteractionResponseType, InteractionType,
+    ButtonStyle, ComponentType, InteractionResponseType, InteractionType
+} from "discord-api-types/payloads/v10";
+import {
     RESTPatchAPIWebhookWithTokenMessageJSONBody
-} from "discord-api-types/v10";
+} from "discord-api-types/rest/v10";
 import { Env } from "../index.js";
 import { deferResponse, editInteractionResp, jsonResponse, not_impl } from "../utils.js";
 
