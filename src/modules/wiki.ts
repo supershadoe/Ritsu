@@ -255,7 +255,7 @@ async function fetchArticleAndRespond(
             searchTerm, requestURL, interactionResponse
         );
 
-        if (behaviourFlag === "wikipedia" && pageid) {
+        if (behaviourFlag === "wikipedia") {
             if (pageid)
                 await wikipediaExtracts(
                     pageid.toString(), requestURL, interactionResponse
