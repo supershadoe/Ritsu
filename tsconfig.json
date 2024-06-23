@@ -3,9 +3,9 @@
   "compilerOptions": {
     "target": "ESNext",
     "lib": ["ESNext"],
-    "module": "ESNext",
+    "module": "NodeNext",
     "rootDir": "./src",
-    "moduleResolution": "node16",
+    "moduleResolution": "NodeNext",
     "types": ["@cloudflare/workers-types"],
     "allowJs": false,
     "noEmit": true,
