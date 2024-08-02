@@ -1,7 +1,7 @@
 `use strict`;
 
 import {
-    ApplicationCommandOptionType, ApplicationCommandType
+    ApplicationCommandOptionType, ApplicationCommandType,
 } from "discord-api-types/payloads/v10";
 import {
     Locale, RESTPostAPIApplicationCommandsJSONBody
@@ -19,12 +19,12 @@ const commands = [
                     "The name of the compound "
                     + "/ Try to use the IUPAC name for accurate result",
                 type: ApplicationCommandOptionType.String,
-                required: true
+                required: true,
             }
         ],
-        dm_permission: false,
-        type: ApplicationCommandType.ChatInput
-    } satisfies RESTPostAPIApplicationCommandsJSONBody,
+        type: ApplicationCommandType.ChatInput,
+        
+    },
     {
         name: "wiki",
         description: "Commands to access various wiki pages",
@@ -38,13 +38,13 @@ const commands = [
                         name: "search_term",
                         description: "Term to search for",
                         type: ApplicationCommandOptionType.String,
-                        required: true
+                        required: true,
                     },
                     {
                         name: "fandom_name",
                         description: "Fandom site to search in",
                         type: ApplicationCommandOptionType.String,
-                        required: true
+                        required: true,
                     }
                 ]
             },
@@ -57,7 +57,7 @@ const commands = [
                         name: "search_term",
                         description: "Term to search for",
                         type: ApplicationCommandOptionType.String,
-                        required: true
+                        required: true,
                     },
                     {
                         name: "language",
@@ -66,17 +66,16 @@ const commands = [
                         choices: Object.entries(Locale).map(
                             ([lang_name, lang_code]) => ({
                                 name: lang_name,
-                                value: lang_code.split("-")[0]
+                                value: lang_code.split("-")[0],
                             })
                         ).slice(0, 25),
-                        required: false
+                        required: false,
                     }
                 ]
             }
         ],
-        dm_permission: false,
-        type: ApplicationCommandType.ChatInput
-    } satisfies RESTPostAPIApplicationCommandsJSONBody
-];
+        type: ApplicationCommandType.ChatInput,
+    },
+] satisfies RESTPostAPIApplicationCommandsJSONBody[];
 
 export default commands;
