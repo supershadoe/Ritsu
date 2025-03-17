@@ -1,0 +1,14 @@
+# App ID alloted by discord for the bot
+RITSU_APP_ID=0000000000000
+
+# The public key to validate whether a request is from Discord or not
+RITSU_APP_PUB_KEY=000000000000000000
+
+# JWT provided by Discord, used for OAuth to sync commands with
+# Discord
+# Only stored locally
+RITSU_CLIENT_SECRET=000000000.0000000.000000000000000000000000000
+
+# To identify whether the env is dev or prod
+# Only stored locally
+TRUSTED_LOCAL_ENV=1

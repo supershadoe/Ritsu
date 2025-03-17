@@ -1,6 +1,7 @@
 # Ignoring all vscode files except run config
 .vscode/*
 !.vscode/launch.json
+!.vscode/settings.json
 
 # Ignore node_modules
 node_modules
