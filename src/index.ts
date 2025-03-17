@@ -9,17 +9,6 @@ import wiki from "./modules/wiki.js";
 import { jsonResponse } from "./utils.js";
 import { checkForSigAndTS, verifySig } from "./verifyInter.js";
 
-/** 
- * A typed object to describe the data in the environment of workers
- * (like env vars, KV bindings, etc.)
- */
- export interface Env {
-    RITSU_APP_PUB_KEY: string;
-    RITSU_APP_ID: string;
-    RITSU_CLIENT_SECRET?: string;
-    TRUSTED_LOCAL_ENV?: string;
-};
-
 /** The type of arguments streamed to and fro each function in this code. */
 type HandlerArgs = [Request, Env, ExecutionContext];
 

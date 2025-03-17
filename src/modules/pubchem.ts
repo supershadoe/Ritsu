@@ -12,7 +12,6 @@ import {
 import {
     RESTPatchAPIWebhookWithTokenMessageJSONBody
 } from "discord-api-types/rest/v10";
-import { Env } from "../index.js";
 import { deferResponse, editInteractionResp, jsonResponse, not_impl } from "../utils.js";
 
 /** Type of embed sent in response. */

@@ -1,7 +1,6 @@
 `use strict`;
 
 import { RouteBases, Routes } from "discord-api-types/rest/v10";
-import { Env } from "./index.js";
 import commands from "./modules/index.js";
 import { jsonHeaders, jsonResponse } from "./utils.js";
 
